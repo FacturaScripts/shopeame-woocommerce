@@ -65,18 +65,12 @@ class shopeame_nuevo_pedido{
 
         $response = wp_remote_post( 'https://shopea.me/WebHooks', $args );
 
-        $debug_data = array();
         if ( is_wp_error( $response ) ) {
             $error_message = $response->get_error_message();
             error_log('Shopeame Plugin ERROR al enviar el JSON del pedido ' . $IDpedido . ': ' . $error_message);
         }
     }
 
-    // Esta función ya no se llama desde shopeame_crear_pedido, pero se mantiene para evitar errores si se usa en otro lugar.
-    function test($response){
-        update_option( 'respone_test', $response );
-        return $response;
-    }
 }
 
 ?>
