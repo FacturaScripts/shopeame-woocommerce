@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 add_action( 'admin_menu', 'shopeame_add_menu' );
-
+add_action( 'woocommerce_checkout_order_processed', 'shopeame_crear_pedido', 10, 1 );
 
 function shopeame_add_menu() {
     add_menu_page(
@@ -56,7 +56,7 @@ function shopeameSettings() {
         $args = array(
             'method'    => 'POST',
             'headers'   => array(
-                'Content-Type' => 'application/json; charset=utf-8',
+                'Content-Type' => 'application/json; charset=utf-t',
             ),
             'body'      => $body
         );
@@ -128,8 +128,79 @@ function shopeameSettings() {
         }
         ?>
 
-        </div>
+    </div>
     
-        <?php
+    <?php
+}
+
+
+function shopeame_crear_pedido( $IDpedido ) {
+    if ( ! $IDpedido ) {
+        return;
     }
+
+    error_log('Shopeame Plugin: Iniciando el proceso para el pedido ID: ' . $IDpedido);
+
+    // 2. Obtener el objeto del pedido.
+    $order = wc_get_order( $IDpedido );
+
+    if ( ! $order ) {
+        error_log('Shopeame Plugin ERROR: No se pudo obtener el objeto del pedido para el ID: ' . $IDpedido);
+        return;
+    }
+
+    // Obtener shop_uuid y webhook_token de las opciones guardadas
+    $shop_uuid = get_option( 'shop_uuid', '' );
+    $webhook_token = get_option( 'webhook_token', '' );
+
+    // 3. Construir el array con los datos del pedido en el formato especificado.
+    $items_data = array();
+    foreach ( $order->get_items() as $item_id => $item ) {
+        $product = $item->get_product();
+        $item_name = $item->get_name(); // Usar el nombre del producto como clave
+        $items_data[ $item_name ] = array(
+            'product_id'   => $item->get_product_id(),
+            'variation_id' => $item->get_variation_id(),
+            'sku'          => $product ? $product->get_sku() : null,
+            'quantity'     => $item->get_quantity(),
+            'price'        => $item->get_total(), // Asumiendo que 'precio' se refiere al total para este artículo
+            'subtotal'     => $item->get_subtotal(),
+            'total'        => $item->get_total(),
+        );
+    }
+
+    $payload = array(
+        'event' => 'new_order',
+        'shop'  => $shop_uuid,
+        'token' => $webhook_token,
+        'order' => array(
+            'id'        => $order->get_id(),
+            'reference' => $order->get_order_number(),
+            'cliente'   => $order->get_customer_id(),
+            'totales'   => $order->get_total(),
+            'estado'    => $order->get_status(),
+            'items'     => $items_data,
+            'fecha'     => $order->get_date_created()->format( 'd-m-y' ),
+        )
+    );
+
+    // 4. Convertir el array a una cadena JSON.
+    $json_body = wp_json_encode( $payload );
+
+    $args = array(
+        'body'      => $json_body,
+        'headers'   => array(
+            'Content-Type' => 'application/json; charset=utf-8',
+        ),
+        'timeout'   => 45,
+        'blocking'  => true,
+    );
+
+    $response = wp_remote_post( 'https://shopea.me/WebHooks', $args );
+
+    if ( is_wp_error( $response ) ) {
+        $error_message = $response->get_error_message();
+        error_log('Shopeame Plugin ERROR al enviar el JSON del pedido ' . $IDpedido . ': ' . $error_message);
+    }
+}
 ?>
