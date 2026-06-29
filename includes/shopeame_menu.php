@@ -1,13 +1,13 @@
 <?php
 
-class shopeame_menu{
+class shopeame_menu {
     // añade el menú de shopeame en el panel de WordPress
     function shopeame_add_menu() {
         add_menu_page(
             'Shopeame',
             'Shopeame',
             'manage_options',
-            'shopeame-woocommerce',
+            'shopeame',
             array( $this, 'shopeameSettings' ),
             'dashicons-cart',
             56
@@ -15,123 +15,222 @@ class shopeame_menu{
     }
 
     function shopeameSettings() {
-        //Se encarga del registro de la tienda y la conexión con Shopeame ademas de mostrar el estado y formulario de conexion.
-        if ($_POST['disconnect_shopeame'] === 'true') {
-            update_option( 'shop_uuid', '');
-            update_option( 'webhook_token', '');
-        }
-        else if (isset($_POST['erp']) && isset($_POST['token'])) {
-                $erp = trim( $_POST['erp'] );
-                $token = trim( $_POST['token'] );
-                $api_user = trim( $_POST['api_user'] );
-                $api_key = trim( $_POST['api_key'] );
+        // procesamos las acciones del formulario antes de pintar la pantalla
+        $this->handleActions();
 
-                $jsonApi = array(
-                    'event'    => 'register_woocommerce',
-                    'erp'      => $erp,
-                    'token'    => $token,
-                    'shop'     => array(
-                        'url'       => get_site_url(),
-                        'api_user'  => $api_user,
-                        'api_key'   => $api_key,
-                    )
-                );
-
-            $body = json_encode( $jsonApi );
-
-            $args = array(
-                    'method'    => 'POST',
-                'headers'   => array(
-                    'Content-Type' => 'application/json; charset=utf-t',
-                ),
-                'body'      => $body
-            );
-
-            $response = wp_remote_post( 'https://shopea.me/WebHooks', $args );
-                if ( is_wp_error( $response ) ) {
-                    echo '<div class="error"><p>Error al conectar con Shopeame: ' . esc_html( $response->get_error_message() ) . '</p></div>';
-                return;
-                } else {
-                    $response_code = wp_remote_retrieve_response_code( $response );
-                    $response_body = wp_remote_retrieve_body( $response );
-
-                if ( $response_code === 200 ) {
-                    $data = json_decode( $response_body, true );
-
-                    if ( isset( $data['shop_uuid'] ) && isset( $data['webhook_token'] ) ) {
-                        update_option( 'shop_uuid', $data['shop_uuid'] );
-                        update_option( 'webhook_token', $data['webhook_token'] );
-                        echo '<div class="notice notice-success"><p>Conexión con Shopeame establecida correctamente.</p></div>';
-                    } else {
-                        echo '<div class="error"><p>Error: La respuesta del servidor de Shopeame no tiene el formato esperado.</p></div>';
-                    }
-                } else {
-                    $error_message = wp_remote_retrieve_response_message( $response );
-                    echo '<div class="error"><p>Error al conectar con Shopeame. El servidor respondió con el código ' . htmlentities( $response_code ) . ': ' . htmlentities( $error_message ) . '</p></div>';
-                    }
-                }
-            }
-        $erp  = get_option( 'shop_uuid', '' );
-        $token = get_option( 'webhook_token', '' );
-        
-
-        if($erp!==""&&$token!==""){
-            $connected = true;
-        }
-        else{
-            $connected = false;
-        }
-
+        $linked   = shopeame_is_linked();
+        $api_user = get_option( 'shopeame_api_user', '' );
+        $api_key  = get_option( 'shopeame_api_key', '' );
+        $shop_url = get_site_url();
         ?>
-
         <div class="wrap">
-            <h1>Shopeame Settings</h1>
-            <p>Configura la conexión entre tu tienda WooCommerce y Shopeame.</p>
+            <h1>Shopeame</h1>
 
-            <?php
-            if ($connected) {
-                echo <<< END
-                <p style="color: green;">La tienda está conectada a Shopeame.</p>
-                <form action="#" method="post">
-                    <input type="hidden" name="disconnect_shopeame" value="true">
-                    <input type="submit" value="Desconectar Shopeame" class="button-secondary">
-                </form>
-                END;
-            }
-            else {
-                echo <<< 'END'
-                <p style="color: red;">La tienda no está conectada a Shopeame.</p>
-                <form method="post" action="">
-                    <input type="hidden" name="shopeame_action" value="connect">
+            <?php if ( $linked ) { ?>
+                <div class="card" style="max-width:720px;">
+                    <h2>Tienda vinculada ✅</h2>
+                    <p>La tienda <strong><?php echo esc_html( $shop_url ); ?></strong> está vinculada con
+                       <a href="https://shopea.me" target="_blank">shopea.me</a>. Sus pedidos se sincronizan automáticamente.
+                       <a href="<?php echo esc_url( shopeame_server_url() . '/shop-link/' . get_option( 'shop_uuid', '' ) ); ?>" target="_blank">Ver la tienda en shopea.me</a>.</p>
+                </div>
+
+                <div class="card" style="max-width:720px;">
+                    <h2>Acciones</h2>
+                    <p>
+                        <form method="post" action="" style="display:inline-block; margin-right:.5rem;">
+                            <?php wp_nonce_field( 'shopeame_action' ); ?>
+                            <input type="hidden" name="shopeame_action" value="check">
+                            <input type="submit" class="button button-secondary" value="Comprobar conexión">
+                        </form>
+                        <form method="post" action="" style="display:inline-block;" onsubmit="return confirm('¿Seguro que quieres desvincular la tienda de shopea.me?');">
+                            <?php wp_nonce_field( 'shopeame_action' ); ?>
+                            <input type="hidden" name="shopeame_action" value="unlink">
+                            <input type="submit" class="button button-primary" value="Desvincular tienda">
+                        </form>
+                    </p>
+                </div>
+            <?php } else { ?>
+                <p>Conecta tu tienda WooCommerce con <a href="https://shopea.me" target="_blank">shopea.me</a>.
+                   Para ello necesitas tener previamente registrado tu ERP en shopea.me. Después tienes dos formas de vincularla.</p>
+
+                <div class="card" style="max-width:720px;">
+                    <h2>Opción 1: copiar los datos en shopea.me</h2>
+                    <p>Copia estos datos y pégalos en shopea.me al conectar una tienda de tipo WooCommerce.</p>
                     <table class="form-table" role="presentation">
                         <tbody>
                             <tr>
-                                <th scope="row"><label for="erp_field">UUID de la tienda</label></th>
-                                <td><input name="erp" type="text" id="erp_field" class="regular-text" required placeholder="Introduce el UUID de tu tienda"></td>
+                                <th scope="row">URL de la tienda</th>
+                                <td>
+                                    <code id="shopeame-url"><?php echo esc_html( $shop_url ); ?></code>
+                                    <button type="button" class="button button-small" onclick="navigator.clipboard.writeText(document.getElementById('shopeame-url').textContent)">Copiar</button>
+                                </td>
                             </tr>
                             <tr>
-                                <th scope="row"><label for="token_field">Token del Webhook</label></th>
-                                <td><input name="token" type="text" id="token_field" class="regular-text" required placeholder="Introduce el token del webhook"></td>
+                                <th scope="row">Clave del cliente (Consumer key)</th>
+                                <td>
+                                    <?php if ( $api_user !== '' ) { ?>
+                                        <code id="shopeame-ck"><?php echo esc_html( $api_user ); ?></code>
+                                        <button type="button" class="button button-small" onclick="navigator.clipboard.writeText(document.getElementById('shopeame-ck').textContent)">Copiar</button>
+                                    <?php } else { ?>
+                                        <em>— genera las claves —</em>
+                                    <?php } ?>
+                                </td>
                             </tr>
                             <tr>
-                                <th scope="row"><label for="api_user_field">Clave del cliente</label></th>
-                                <td><input name="api_user" type="text" id="api_user_field" class="regular-text" required placeholder="Introduce la clave del cliente de WooCommerce"></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="api_key_field">Clave secreta de cliente</label></th>
-                                <td><input name="api_key" type="text" id="api_key_field" class="regular-text" required placeholder="Introduce la clave secreta del cliente de WooCommerce"></td>
+                                <th scope="row">Clave secreta (Consumer secret)</th>
+                                <td>
+                                    <?php if ( $api_key !== '' ) { ?>
+                                        <code id="shopeame-cs"><?php echo esc_html( $api_key ); ?></code>
+                                        <button type="button" class="button button-small" onclick="navigator.clipboard.writeText(document.getElementById('shopeame-cs').textContent)">Copiar</button>
+                                    <?php } else { ?>
+                                        <em>— genera las claves —</em>
+                                    <?php } ?>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
-                    <input type="submit" name="submit" id="submit" class="button button-primary" value="Conectar Shopeame">
-                </form>
-                END;
-            }
-            ?>
+                    <form method="post" action="">
+                        <?php wp_nonce_field( 'shopeame_action' ); ?>
+                        <input type="hidden" name="shopeame_action" value="generate_keys">
+                        <input type="submit" class="button button-secondary"
+                               value="<?php echo $api_user !== '' ? 'Regenerar claves API' : 'Generar claves API'; ?>">
+                    </form>
+                </div>
 
+                <div class="card" style="max-width:720px;">
+                    <h2>Opción 2: vincular indicando tu ERP</h2>
+                    <p>Introduce el UUID y el token de tu ERP (los obtienes en shopea.me una vez registrado el ERP).
+                       Se generarán las claves API automáticamente si aún no existen.</p>
+                    <form method="post" action="">
+                        <?php wp_nonce_field( 'shopeame_action' ); ?>
+                        <input type="hidden" name="shopeame_action" value="link">
+                        <table class="form-table" role="presentation">
+                            <tbody>
+                                <tr>
+                                    <th scope="row"><label for="erp_field">UUID del ERP</label></th>
+                                    <td><input name="erp" type="text" id="erp_field" class="regular-text" required placeholder="UUID del ERP"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><label for="token_field">Token del ERP</label></th>
+                                    <td><input name="token" type="text" id="token_field" class="regular-text" required placeholder="Token del ERP"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <input type="submit" class="button button-primary" value="Vincular tienda">
+                    </form>
+                </div>
+            <?php } ?>
         </div>
-        
         <?php
     }
 
+    /**
+     * Procesa las acciones (generar claves, vincular, comprobar, desvincular) enviadas por POST.
+     */
+    private function handleActions() {
+        if ( empty( $_POST['shopeame_action'] ) ) {
+            return;
+        }
+        if ( ! check_admin_referer( 'shopeame_action' ) ) {
+            return;
+        }
+
+        $action = sanitize_text_field( wp_unslash( $_POST['shopeame_action'] ) );
+
+        switch ( $action ) {
+            case 'generate_keys':
+                $this->actionGenerateKeys();
+                break;
+            case 'link':
+                $this->actionLink();
+                break;
+            case 'check':
+                $this->actionCheck();
+                break;
+            case 'unlink':
+                $this->actionUnlink();
+                break;
+        }
+    }
+
+    private function actionGenerateKeys() {
+        if ( shopeame_generate_api_keys() ) {
+            $this->notice( 'success', 'Claves API generadas correctamente.' );
+        } else {
+            $this->notice( 'error', 'No se pudieron generar las claves API. ¿Está activo WooCommerce?' );
+        }
+    }
+
+    private function actionLink() {
+        $erp   = isset( $_POST['erp'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['erp'] ) ) ) : '';
+        $token = isset( $_POST['token'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['token'] ) ) ) : '';
+        if ( $erp === '' || $token === '' ) {
+            $this->notice( 'error', 'Introduce el UUID y el token del ERP.' );
+            return;
+        }
+
+        // generamos las claves API si aún no existen
+        if ( get_option( 'shopeame_api_user', '' ) === '' || get_option( 'shopeame_api_key', '' ) === '' ) {
+            if ( ! shopeame_generate_api_keys() ) {
+                $this->notice( 'error', 'No se pudieron generar las claves API. ¿Está activo WooCommerce?' );
+                return;
+            }
+        }
+
+        $result = shopeame_post_webhook( array(
+            'event'    => 'register_woocommerce',
+            'erp'      => $erp,
+            'token'    => $token,
+            'new_shop' => array(
+                'url'      => get_site_url(),
+                'api_user' => get_option( 'shopeame_api_user', '' ),
+                'api_key'  => get_option( 'shopeame_api_key', '' ),
+            ),
+        ) );
+
+        if ( $result['ok'] && isset( $result['data']['shop_uuid'], $result['data']['webhook_token'] ) ) {
+            update_option( 'shop_uuid', $result['data']['shop_uuid'] );
+            update_option( 'webhook_token', $result['data']['webhook_token'] );
+            $this->notice( 'success', 'Tienda vinculada con shopea.me correctamente.' );
+        } else {
+            $this->notice( 'error', 'No se pudo vincular la tienda. Revisa que el UUID y el token del ERP sean correctos.' );
+        }
+    }
+
+    private function actionCheck() {
+        $result = shopeame_post_webhook( array(
+            'event' => 'check_shop',
+            'shop'  => get_option( 'shop_uuid', '' ),
+            'token' => get_option( 'webhook_token', '' ),
+        ) );
+
+        if ( $result['ok'] && ! empty( $result['data']['exists'] ) ) {
+            $this->notice( 'success', 'La conexión con shopea.me funciona correctamente.' );
+        } else {
+            $this->notice( 'error', 'No se pudo confirmar la conexión con shopea.me.' );
+        }
+    }
+
+    private function actionUnlink() {
+        $result = shopeame_post_webhook( array(
+            'event' => 'unlink_shop',
+            'shop'  => get_option( 'shop_uuid', '' ),
+            'token' => get_option( 'webhook_token', '' ),
+        ) );
+
+        // borramos las credenciales locales aunque el servidor falle, para no dejar la tienda
+        // en un estado intermedio; el usuario siempre podrá volver a vincularla
+        update_option( 'shop_uuid', '' );
+        update_option( 'webhook_token', '' );
+
+        if ( $result['ok'] ) {
+            $this->notice( 'success', 'Tienda desvinculada de shopea.me.' );
+        } else {
+            $this->notice( 'warning', 'Se borraron las credenciales locales, pero shopea.me no confirmó la desvinculación.' );
+        }
+    }
+
+    private function notice( $type, $message ) {
+        printf( '<div class="notice notice-%s"><p>%s</p></div>', esc_attr( $type ), esc_html( $message ) );
+    }
 }

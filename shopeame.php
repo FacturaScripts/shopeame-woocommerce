@@ -1,9 +1,12 @@
 <?php
 /**
- * Plugin Name: Shopeame WooCommerce
- * Description: Plugin para integrar Shopeame con WooCommerce.
- * Version: 0.1
- * Author: Facturascripts
+ * Plugin Name: Shopeame
+ * Plugin URI: https://shopea.me/woocommerce
+ * Description: Plugin para integrar WooCommerce con Shopea.me.
+ * Version: 1
+ * Author: Shopeame
+ * Author URI: https://shopea.me
+ * Domain Path: /i18n/languages/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -11,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 
+require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_helpers.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_menu.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_nuevo_pedido.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_modificar_pedido.php';
@@ -33,4 +37,3 @@ function shopeame_modificar_pedido( $IDpedido ) {
     $shopeame_modificar_pedido = new shopeame_modificar_pedido();
     $shopeame_modificar_pedido->shopeame_actualizar_pedido( $IDpedido );
 }
-?>
