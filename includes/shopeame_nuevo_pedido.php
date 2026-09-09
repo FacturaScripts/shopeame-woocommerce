@@ -21,7 +21,19 @@ class shopeame_nuevo_pedido {
         ) );
 
         if ( ! $result['ok'] ) {
-            error_log( 'Shopeame Plugin: error al enviar new_order del pedido ' . $IDpedido );
+            // detallamos el motivo: sin el código HTTP no se distingue un token inválido (401)
+            // de un fallo de red o un timeout (code 0)
+            $detalle = isset( $result['error'] ) ? $result['error'] : '';
+            if ( $detalle === '' && isset( $result['data']['error'] ) ) {
+                $detalle = $result['data']['error'];
+            }
+
+            error_log( sprintf(
+                'Shopeame Plugin: error al enviar new_order del pedido %s (HTTP %s) %s',
+                $IDpedido,
+                $result['code'],
+                $detalle
+            ) );
         }
     }
 }
