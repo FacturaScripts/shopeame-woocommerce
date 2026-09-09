@@ -10,14 +10,21 @@ Plugin que conecta una tienda **WooCommerce** (WordPress) con **[shopea.me](http
 - **Vinculación con shopea.me**, de dos formas:
   1. **Copiar credenciales**: la página muestra la *URL de la tienda* y las *claves de la API REST*
      de WooCommerce (consumer key/secret, que el plugin **genera automáticamente**) con botones para
-     copiarlas y pegarlas en shopea.me al conectar una tienda de tipo WooCommerce.
+     copiarlas y pegarlas en shopea.me al conectar una tienda de tipo WooCommerce. Tras crearla,
+     ShopeameServer intenta devolver sus credenciales a `/wp-json/shopeame/v1/link`.
   2. **Vincular indicando el ERP**: el usuario introduce el *UUID* y el *token* de su ERP (los
      obtiene en shopea.me) y el plugin se registra solo en shopea.me (evento `register_woocommerce`,
      generando las claves API si hace falta) y guarda el `shop_uuid` y `webhook_token` devueltos.
+     Si ya estaba vinculada, recupera esos datos sin crear un nuevo enlace en ShopeameServer.
 - **Estado vinculada**: indica que la tienda está conectada, con enlace directo a su configuración
-  en shopea.me, y botones para **comprobar conexión** y **desvincular**.
+  en shopea.me, y botones para **comprobar conexión**, **desvincular** o **borrar los datos de la
+  app**. Esta última acción elimina solo el `shop_uuid` y el `webhook_token` locales, conserva las
+  claves de WooCommerce y no envía ninguna petición a ShopeameServer.
 - **Pedidos en tiempo real**: mediante los hooks `woocommerce_new_order` y `woocommerce_update_order`
   envía el `order_id` a ShopeameServer; el servidor descarga el pedido y lo sincroniza con el ERP.
+
+La recepción automática requiere HTTPS y una firma HMAC-SHA256 vigente creada con la Consumer
+secret guardada por el plugin. Si el endpoint no está disponible, se mantiene el copiado manual.
 
 ## Instalación
 

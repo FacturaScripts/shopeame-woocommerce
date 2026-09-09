@@ -1,5 +1,9 @@
 <?php
+/**
+ * Pantalla administrativa y acciones de vinculación del plugin Shopeame.
+ */
 
+/** Gestiona el menú y la configuración administrativa de Shopeame. */
 class shopeame_menu {
     // añade el menú de shopeame en el panel de WordPress
     function shopeame_add_menu() {
@@ -36,18 +40,23 @@ class shopeame_menu {
 
                 <div class="card" style="max-width:720px;">
                     <h2>Acciones</h2>
-                    <p>
+                    <div>
                         <form method="post" action="" style="display:inline-block; margin-right:.5rem;">
                             <?php wp_nonce_field( 'shopeame_action' ); ?>
                             <input type="hidden" name="shopeame_action" value="check">
                             <input type="submit" class="button button-secondary" value="Comprobar conexión">
                         </form>
-                        <form method="post" action="" style="display:inline-block;" onsubmit="return confirm('¿Seguro que quieres desvincular la tienda de shopea.me?');">
+                        <form method="post" action="" style="display:inline-block; margin-right:.5rem;" onsubmit="return confirm('Esta acción desvinculará la tienda de Shopeame. ¿Quieres continuar?');">
                             <?php wp_nonce_field( 'shopeame_action' ); ?>
                             <input type="hidden" name="shopeame_action" value="unlink">
                             <input type="submit" class="button button-primary" value="Desvincular tienda">
                         </form>
-                    </p>
+                        <form method="post" action="" style="display:inline-block;" onsubmit="return confirm('Esta acción solo borrará los datos de conexión guardados en la app y no modificará Shopeame. ¿Quieres continuar?');">
+                            <?php wp_nonce_field( 'shopeame_action' ); ?>
+                            <input type="hidden" name="shopeame_action" value="clear_local">
+                            <input type="submit" class="button button-secondary" value="Borrar datos de la app">
+                        </form>
+                    </div>
                 </div>
             <?php } else { ?>
                 <p>Conecta tu tienda WooCommerce con <a href="https://shopea.me" target="_blank">shopea.me</a>.
@@ -125,7 +134,9 @@ class shopeame_menu {
     }
 
     /**
-     * Procesa las acciones (generar claves, vincular, comprobar, desvincular) enviadas por POST.
+     * Procesa las acciones de configuración y conexión enviadas por POST.
+     *
+     * @return void
      */
     private function handleActions() {
         if ( empty( $_POST['shopeame_action'] ) ) {
@@ -149,6 +160,9 @@ class shopeame_menu {
                 break;
             case 'unlink':
                 $this->actionUnlink();
+                break;
+            case 'clear_local':
+                $this->actionClearLocal();
                 break;
         }
     }
@@ -191,7 +205,7 @@ class shopeame_menu {
         if ( $result['ok'] && isset( $result['data']['shop_uuid'], $result['data']['webhook_token'] ) ) {
             update_option( 'shop_uuid', $result['data']['shop_uuid'] );
             update_option( 'webhook_token', $result['data']['webhook_token'] );
-            $this->notice( 'success', 'Tienda vinculada con shopea.me correctamente.' );
+            $this->notice( 'success', $this->linkSuccessMessage( $result['data']['message'] ?? '' ) );
         } else {
             $this->notice( 'error', 'No se pudo vincular la tienda. Revisa que el UUID y el token del ERP sean correctos.' );
         }
@@ -230,7 +244,37 @@ class shopeame_menu {
         }
     }
 
+    /**
+     * Borra únicamente las credenciales de vinculación guardadas en WordPress.
+     *
+     * No realiza ninguna petición a ShopeameServer y conserva las claves de la API de WooCommerce.
+     *
+     * @return void
+     */
+    private function actionClearLocal() {
+        update_option( 'shop_uuid', '' );
+        update_option( 'webhook_token', '' );
+
+        $this->notice( 'success', 'Se borraron los datos de conexión de la app sin modificar ShopeameServer.' );
+    }
+
     private function notice( $type, $message ) {
         printf( '<div class="notice notice-%s"><p>%s</p></div>', esc_attr( $type ), esc_html( $message ) );
+    }
+
+    /**
+     * Traduce el código devuelto por ShopeameServer al mensaje para el comercio.
+     *
+     * @param string $message Código de resultado del servidor.
+     * @return string
+     */
+    private function linkSuccessMessage( $message ) {
+        if ( $message === 'shop-already-exists' ) {
+            return 'La tienda ya estaba vinculada. Se recuperaron sus datos sin crear una tienda nueva.';
+        }
+        if ( $message === 'shop-reactivated' ) {
+            return 'La tienda se reactivó y quedó vinculada con shopea.me correctamente.';
+        }
+        return 'Tienda vinculada con shopea.me correctamente.';
     }
 }

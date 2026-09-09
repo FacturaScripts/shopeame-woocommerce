@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_helpers.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_link_endpoint.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_menu.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_nuevo_pedido.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_modificar_pedido.php';
