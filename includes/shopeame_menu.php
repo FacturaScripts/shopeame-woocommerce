@@ -27,6 +27,16 @@ class shopeame_menu {
     const NONCE_ACTION = 'shopeame_action';
 
     /**
+     * Icono del menú lateral: el logo de Shopeame (la «S» con líneas de velocidad) como SVG monocromo.
+     *
+     * Es el contenido de assets/shopeame-menu-icon.svg codificado en base64. WordPress lo recolorea con el
+     * esquema de colores del administrador. Se guarda ya codificado para no usar base64_encode() ni leer el
+     * archivo en cada carga. Si se cambia el SVG, se regenera con:
+     * printf '%s' "$(cat assets/shopeame-menu-icon.svg)" | base64
+     */
+    const MENU_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEwIDggNzQgNzQiPjxwYXRoIGZpbGw9ImJsYWNrIiBkPSJNNDcgMjdDNDggMjIgNTQgMTkuNSA2MyAxOS41TDcyIDE5LjVDNzggMTkuNyA4MiAyMSA4MS41IDI0TDc5LjUgMzNMNjAgMzNMNTkuNSAzN0w2NiAzNy41Qzc0IDM4IDc5LjUgNDEgNzkgNDdMNzggNTZMNzcgNTlDNzUgNjYgNzEgNjkgNjQgNzAuNUM1OCA3MS41IDUwIDcxLjUgNDQgNzAuNUM0MCA3MCAzNy41IDY4LjUgMzggNjZMNDAgNTdMNjIuNSA1Ni41TDYzIDUzTDU1IDUyLjVDNTAgNTIgNDcuNSA1MSA0NSA0OC41QzQzIDQ2LjUgNDIuNSA0MyA0MyA0MFpNMjIgMjFMNDkgMjAuNUw0NiAyNFpNMTIgMjhMNDMgMjcuNUw0MiAzMS41Wk0xMiAzNUw0MyAzNUw0MCAzOC41Wk0xMyA0M0w0MSA0M0w0MCA0Ni41Wk0xNiA1MC41TDQ2IDUwLjVMNDkgNTMuNVpNMTQgNThMMzggNThMMzYgNjEuNVpNMTMgNjUuNUwzNiA2NS41TDM0IDY4LjVaIi8+PC9zdmc+';
+
+    /**
      * Resultado de la última acción procesada, que se pinta como banner bajo la primera sección.
      *
      * @var array{type: string, message: string}|null
@@ -45,7 +55,7 @@ class shopeame_menu {
             self::CAPABILITY,
             self::PAGE_SLUG,
             array( $this, 'shopeameSettings' ),
-            'dashicons-cart',
+            self::MENU_ICON,
             56
         );
     }
