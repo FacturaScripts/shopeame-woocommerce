@@ -1,50 +1,96 @@
 <?php
 /**
  * Funciones auxiliares compartidas del plugin Shopeame.
+ *
+ * @package Shopeame
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/** Opción con el identificador de la tienda en shopea.me. */
+const SHOPEAME_OPTION_SHOP_UUID = 'shopeame_shop_uuid';
+
+/** Opción con el token que autentica a la tienda ante shopea.me. */
+const SHOPEAME_OPTION_WEBHOOK_TOKEN = 'shopeame_webhook_token';
+
+/** Opción con la clave del cliente (consumer key) de la API REST de WooCommerce. */
+const SHOPEAME_OPTION_API_USER = 'shopeame_api_user';
+
+/** Opción con la clave secreta (consumer secret) de la API REST de WooCommerce. */
+const SHOPEAME_OPTION_API_KEY = 'shopeame_api_key';
+
+/** Opción con la versión del plugin con la que se migraron por última vez los datos guardados. */
+const SHOPEAME_OPTION_DB_VERSION = 'shopeame_db_version';
+
+/** Descripción con la que se guardan en WooCommerce las claves de la API creadas por el plugin. */
+const SHOPEAME_API_KEY_DESCRIPTION = 'Shopeame';
+
 /**
  * URL base del servidor de ShopeameServer (shopea.me).
+ *
  * Se puede sobreescribir definiendo la constante SHOPEAME_SERVER_URL en wp-config.php
  * (útil para apuntar a una instalación local en desarrollo).
+ *
+ * @return string URL sin barra final.
  */
 function shopeame_server_url() {
     $url = defined( 'SHOPEAME_SERVER_URL' ) ? SHOPEAME_SERVER_URL : 'https://shopea.me';
-    return rtrim( $url, '/' );
+    return untrailingslashit( $url );
 }
 
 /**
- * Indica si estamos en modo desarrollo. Se controla con la constante SHOPEAME_DEV (wp-config.php).
- * En desarrollo se acepta el certificado TLS local autofirmado (no se verifica el SSL).
+ * Migra los datos guardados por versiones anteriores del plugin, una sola vez por versión.
+ *
+ * Hasta la versión 1.0.0 las credenciales de vinculación se guardaban en las opciones genéricas
+ * «shop_uuid» y «webhook_token»; ahora llevan el prefijo del plugin para no chocar con otros plugins.
+ *
+ * @return void
  */
-function shopeame_is_dev() {
-    return defined( 'SHOPEAME_DEV' ) && SHOPEAME_DEV;
+function shopeame_maybe_upgrade() {
+    if ( get_option( SHOPEAME_OPTION_DB_VERSION ) === SHOPEAME_VERSION ) {
+        return;
+    }
+
+    $old_uuid  = get_option( 'shop_uuid', '' );
+    $old_token = get_option( 'webhook_token', '' );
+    if ( is_string( $old_uuid ) && $old_uuid !== '' && is_string( $old_token ) && $old_token !== ''
+        && get_option( SHOPEAME_OPTION_SHOP_UUID, '' ) === '' ) {
+        update_option( SHOPEAME_OPTION_SHOP_UUID, $old_uuid );
+        update_option( SHOPEAME_OPTION_WEBHOOK_TOKEN, $old_token );
+        delete_option( 'shop_uuid' );
+        delete_option( 'webhook_token' );
+    }
+
+    update_option( SHOPEAME_OPTION_DB_VERSION, SHOPEAME_VERSION );
 }
 
 /**
  * Envía un evento al controlador WebHooks de ShopeameServer.
- * Devuelve un array con 'ok' (bool), 'code' (int) y 'data' (array|null).
+ *
+ * @param array $payload Datos del evento que se envían como JSON.
+ * @return array Array con 'ok' (bool), 'code' (int), 'data' (array|null) y, si falla la petición, 'error' (string).
  */
 function shopeame_post_webhook( array $payload ) {
-    $args = array(
-        'method'    => 'POST',
-        'headers'   => array( 'Content-Type' => 'application/json; charset=utf-8' ),
-        'body'      => wp_json_encode( $payload ),
-        'timeout'   => 20,
-        // en desarrollo no verificamos el certificado TLS (servidor local autofirmado)
-        'sslverify' => ! shopeame_is_dev(),
+    $response = wp_remote_post(
+        shopeame_server_url() . '/WebHooks',
+        array(
+            'headers' => array( 'Content-Type' => 'application/json; charset=utf-8' ),
+            'body'    => wp_json_encode( $payload ),
+            'timeout' => 20,
+        )
     );
-
-    $response = wp_remote_post( shopeame_server_url() . '/WebHooks', $args );
     if ( is_wp_error( $response ) ) {
-        return array( 'ok' => false, 'code' => 0, 'data' => null, 'error' => $response->get_error_message() );
+        return array(
+            'ok'    => false,
+            'code'  => 0,
+            'data'  => null,
+            'error' => $response->get_error_message(),
+        );
     }
 
-    $code = wp_remote_retrieve_response_code( $response );
+    $code = (int) wp_remote_retrieve_response_code( $response );
     $data = json_decode( wp_remote_retrieve_body( $response ), true );
 
     return array(
@@ -55,17 +101,110 @@ function shopeame_post_webhook( array $payload ) {
 }
 
 /**
+ * Notifica a ShopeameServer un evento de pedido (creación o modificación).
+ *
+ * Solo se envía el identificador del pedido: ShopeameServer descarga el pedido por la API REST de
+ * WooCommerce. Si la tienda no está vinculada no se envía nada. Los fallos se registran en el
+ * registro de WooCommerce (WooCommerce > Estado > Registros, fuente «shopeame»).
+ *
+ * @param string $event    Evento a notificar: new_order o update_order.
+ * @param int    $order_id Identificador del pedido de WooCommerce.
+ * @return void
+ */
+function shopeame_send_order_event( $event, $order_id ) {
+    if ( ! $order_id || ! shopeame_is_linked() ) {
+        return;
+    }
+
+    $result = shopeame_post_webhook(
+        array(
+            'event'    => $event,
+            'shop'     => get_option( SHOPEAME_OPTION_SHOP_UUID, '' ),
+            'token'    => get_option( SHOPEAME_OPTION_WEBHOOK_TOKEN, '' ),
+            'order_id' => absint( $order_id ),
+        )
+    );
+
+    if ( $result['ok'] || ! function_exists( 'wc_get_logger' ) ) {
+        return;
+    }
+
+    // detallamos el motivo: sin el código HTTP no se distingue un token inválido (401)
+    // de un fallo de red o un timeout (code 0)
+    $detail = isset( $result['error'] ) ? $result['error'] : '';
+    if ( $detail === '' && isset( $result['data']['error'] ) && is_string( $result['data']['error'] ) ) {
+        $detail = $result['data']['error'];
+    }
+
+    wc_get_logger()->error(
+        sprintf( 'Error sending %s for order %d (HTTP %d) %s', $event, absint( $order_id ), $result['code'], $detail ),
+        array( 'source' => 'shopeame' )
+    );
+}
+
+/**
  * Indica si la tienda está vinculada con shopea.me (tiene credenciales guardadas).
+ *
+ * @return bool
  */
 function shopeame_is_linked() {
-    return get_option( 'shop_uuid', '' ) !== '' && get_option( 'webhook_token', '' ) !== '';
+    return get_option( SHOPEAME_OPTION_SHOP_UUID, '' ) !== '' && get_option( SHOPEAME_OPTION_WEBHOOK_TOKEN, '' ) !== '';
+}
+
+/**
+ * Guarda las credenciales de vinculación devueltas por ShopeameServer, si tienen un formato válido.
+ *
+ * El shop_uuid lo genera uniqid() (13 caracteres hexadecimales) y el webhook_token es una cadena
+ * alfanumérica de 32 caracteres.
+ *
+ * @param mixed $shop_uuid     Identificador de la tienda en shopea.me.
+ * @param mixed $webhook_token Token de la tienda en shopea.me.
+ * @return bool True si las credenciales eran válidas y se guardaron.
+ */
+function shopeame_save_link_credentials( $shop_uuid, $webhook_token ) {
+    if ( ! is_string( $shop_uuid ) || ! preg_match( '/^[a-f0-9]{13}$/', $shop_uuid )
+        || ! is_string( $webhook_token ) || ! preg_match( '/^[A-Za-z0-9]{32}$/', $webhook_token ) ) {
+        return false;
+    }
+
+    update_option( SHOPEAME_OPTION_SHOP_UUID, $shop_uuid );
+    update_option( SHOPEAME_OPTION_WEBHOOK_TOKEN, $webhook_token );
+    return true;
+}
+
+/**
+ * Borra las credenciales de vinculación con shopea.me guardadas en WordPress.
+ *
+ * @return void
+ */
+function shopeame_clear_link_credentials() {
+    delete_option( SHOPEAME_OPTION_SHOP_UUID );
+    delete_option( SHOPEAME_OPTION_WEBHOOK_TOKEN );
+}
+
+/**
+ * Elimina de WooCommerce las claves de la API REST creadas por el plugin.
+ *
+ * WooCommerce no ofrece una función pública para gestionar sus claves de la API, así que se trabaja
+ * directamente con su tabla, igual que hace el propio WooCommerce en WC_AJAX::update_api_key().
+ *
+ * @return void
+ */
+function shopeame_delete_api_keys() {
+    global $wpdb;
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- tabla propia de WooCommerce sin API pública; no se cachea.
+    $wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'description' => SHOPEAME_API_KEY_DESCRIPTION ), array( '%s' ) );
 }
 
 /**
  * Genera (o regenera) una clave REST de WooCommerce con permisos de lectura y la guarda en options
- * para poder mostrarla y usarla al vincular. Devuelve true si se creó correctamente.
+ * para poder mostrarla y usarla al vincular.
+ *
  * El consumer_key se guarda hasheado en la tabla de WooCommerce; conservamos el par en claro en
  * options porque shopea.me lo necesita para conectarse a la API REST de la tienda.
+ *
+ * @return bool True si se creó correctamente.
  */
 function shopeame_generate_api_keys() {
     global $wpdb;
@@ -75,16 +214,17 @@ function shopeame_generate_api_keys() {
     }
 
     // eliminamos claves Shopeame anteriores para no acumularlas
-    $wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'description' => 'Shopeame' ), array( '%s' ) );
+    shopeame_delete_api_keys();
 
     $consumer_key    = 'ck_' . wc_rand_hash();
     $consumer_secret = 'cs_' . wc_rand_hash();
 
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- tabla propia de WooCommerce sin API pública, igual que WC_AJAX::update_api_key().
     $inserted = $wpdb->insert(
         $wpdb->prefix . 'woocommerce_api_keys',
         array(
             'user_id'         => get_current_user_id(),
-            'description'     => 'Shopeame',
+            'description'     => SHOPEAME_API_KEY_DESCRIPTION,
             'permissions'     => 'read',
             'consumer_key'    => wc_api_hash( $consumer_key ),
             'consumer_secret' => $consumer_secret,
@@ -97,7 +237,7 @@ function shopeame_generate_api_keys() {
         return false;
     }
 
-    update_option( 'shopeame_api_user', $consumer_key );
-    update_option( 'shopeame_api_key', $consumer_secret );
+    update_option( SHOPEAME_OPTION_API_USER, $consumer_key );
+    update_option( SHOPEAME_OPTION_API_KEY, $consumer_secret );
     return true;
 }

@@ -1,6 +1,8 @@
 <?php
 /**
  * Receptor REST de las credenciales enviadas por ShopeameServer al conectar una tienda.
+ *
+ * @package Shopeame
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,24 +33,27 @@ add_action( 'rest_api_init', 'shopeame_register_link_endpoint' );
 /**
  * Verifica la firma HMAC y la vigencia de la petición.
  *
+ * La firma se calcula con la Consumer secret que el plugin generó y que solo conocen la tienda y
+ * shopea.me, por lo que ninguna otra parte puede usar este endpoint.
+ *
  * @param WP_REST_Request $request Petición REST recibida.
  * @return true|WP_Error
  */
 function shopeame_verify_link_request( WP_REST_Request $request ) {
     $timestamp = $request->get_header( 'x-shopeame-timestamp' );
     $signature = $request->get_header( 'x-shopeame-signature' );
-    $secret    = get_option( 'shopeame_api_key', '' );
+    $secret    = get_option( SHOPEAME_OPTION_API_KEY, '' );
 
     if ( ! is_string( $timestamp ) || ! ctype_digit( $timestamp )
         || ! is_string( $signature ) || ! preg_match( '/^[a-f0-9]{64}$/i', $signature )
         || ! is_string( $secret ) || $secret === ''
         || abs( time() - (int) $timestamp ) > SHOPEAME_LINK_TIMESTAMP_TOLERANCE ) {
-        return new WP_Error( 'shopeame_unauthorized', 'Firma no autorizada.', array( 'status' => 401 ) );
+        return new WP_Error( 'shopeame_unauthorized', __( 'Unauthorized signature.', 'shopeame' ), array( 'status' => 401 ) );
     }
 
     $expected = hash_hmac( 'sha256', $timestamp . '.' . $request->get_body(), $secret );
     if ( ! hash_equals( $expected, strtolower( $signature ) ) ) {
-        return new WP_Error( 'shopeame_unauthorized', 'Firma no autorizada.', array( 'status' => 401 ) );
+        return new WP_Error( 'shopeame_unauthorized', __( 'Unauthorized signature.', 'shopeame' ), array( 'status' => 401 ) );
     }
 
     return true;
@@ -63,19 +68,16 @@ function shopeame_verify_link_request( WP_REST_Request $request ) {
 function shopeame_receive_link( WP_REST_Request $request ) {
     $payload = $request->get_json_params();
     if ( ! is_array( $payload ) ) {
-        return new WP_Error( 'shopeame_invalid_json', 'JSON no válido.', array( 'status' => 400 ) );
+        return new WP_Error( 'shopeame_invalid_json', __( 'Invalid JSON.', 'shopeame' ), array( 'status' => 400 ) );
     }
 
-    $shop_uuid     = isset( $payload['shop_uuid'] ) ? $payload['shop_uuid'] : '';
-    $webhook_token = isset( $payload['webhook_token'] ) ? $payload['webhook_token'] : '';
-    if ( ( $payload['event'] ?? '' ) !== 'link_shop'
-        || ! is_string( $shop_uuid ) || strlen( $shop_uuid ) !== 13
-        || ! is_string( $webhook_token ) || strlen( $webhook_token ) !== 32 ) {
-        return new WP_Error( 'shopeame_invalid_payload', 'Datos de vinculación no válidos.', array( 'status' => 422 ) );
+    $saved = ( $payload['event'] ?? '' ) === 'link_shop' && shopeame_save_link_credentials(
+        $payload['shop_uuid'] ?? '',
+        $payload['webhook_token'] ?? ''
+    );
+    if ( ! $saved ) {
+        return new WP_Error( 'shopeame_invalid_payload', __( 'Invalid link data.', 'shopeame' ), array( 'status' => 422 ) );
     }
-
-    update_option( 'shop_uuid', $shop_uuid );
-    update_option( 'webhook_token', $webhook_token );
 
     return new WP_REST_Response( array( 'success' => true ), 200 );
 }

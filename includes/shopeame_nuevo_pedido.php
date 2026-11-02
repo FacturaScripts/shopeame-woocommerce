@@ -1,39 +1,23 @@
 <?php
+/**
+ * Envío a shopea.me de los pedidos nuevos de WooCommerce.
+ *
+ * @package Shopeame
+ */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+/** Notifica a ShopeameServer los pedidos creados en la tienda. */
 class shopeame_nuevo_pedido {
-    function shopeame_crear_pedido( $IDpedido ) {
-
-        if ( ! $IDpedido ) {
-            return;
-        }
-
-        // solo enviamos si la tienda está vinculada con shopea.me
-        if ( ! shopeame_is_linked() ) {
-            return;
-        }
-
-        // enviamos solo el id; ShopeameServer descarga el pedido por la API y lo parsea
-        $result = shopeame_post_webhook( array(
-            'event'    => 'new_order',
-            'shop'     => get_option( 'shop_uuid', '' ),
-            'token'    => get_option( 'webhook_token', '' ),
-            'order_id' => $IDpedido,
-        ) );
-
-        if ( ! $result['ok'] ) {
-            // detallamos el motivo: sin el código HTTP no se distingue un token inválido (401)
-            // de un fallo de red o un timeout (code 0)
-            $detalle = isset( $result['error'] ) ? $result['error'] : '';
-            if ( $detalle === '' && isset( $result['data']['error'] ) ) {
-                $detalle = $result['data']['error'];
-            }
-
-            error_log( sprintf(
-                'Shopeame Plugin: error al enviar new_order del pedido %s (HTTP %s) %s',
-                $IDpedido,
-                $result['code'],
-                $detalle
-            ) );
-        }
+    /**
+     * Envía el evento new_order del pedido indicado.
+     *
+     * @param int $order_id Identificador del pedido de WooCommerce.
+     * @return void
+     */
+    function shopeame_crear_pedido( $order_id ) {
+        shopeame_send_order_event( 'new_order', $order_id );
     }
 }

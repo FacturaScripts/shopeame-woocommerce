@@ -4,7 +4,13 @@
  *
  * La pantalla replica la estructura y los textos de la app de Shopify (base visual común a los
  * conectores de Shopify, WooCommerce y PrestaShop).
+ *
+ * @package Shopeame
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 /** Gestiona el menú y la configuración administrativa de Shopeame. */
 class shopeame_menu {
@@ -13,6 +19,12 @@ class shopeame_menu {
 
     /** Sufijo del hook de la página que devuelve add_menu_page() para un menú de primer nivel. */
     const PAGE_HOOK = 'toplevel_page_shopeame';
+
+    /** Capacidad necesaria para ver la pantalla y ejecutar sus acciones. */
+    const CAPABILITY = 'manage_options';
+
+    /** Acción del nonce de los formularios de la pantalla. */
+    const NONCE_ACTION = 'shopeame_action';
 
     /**
      * Resultado de la última acción procesada, que se pinta como banner bajo la primera sección.
@@ -30,7 +42,7 @@ class shopeame_menu {
         add_menu_page(
             'Shopeame',
             'Shopeame',
-            'manage_options',
+            self::CAPABILITY,
             self::PAGE_SLUG,
             array( $this, 'shopeameSettings' ),
             'dashicons-cart',
@@ -49,18 +61,17 @@ class shopeame_menu {
             return;
         }
 
-        $base_file = dirname( __DIR__ ) . '/shopeame.php';
         wp_enqueue_style(
             'shopeame-admin',
-            plugins_url( 'assets/shopeame-admin.css', $base_file ),
+            plugins_url( 'assets/shopeame-admin.css', SHOPEAME_PLUGIN_FILE ),
             array(),
-            (string) filemtime( dirname( __DIR__ ) . '/assets/shopeame-admin.css' )
+            SHOPEAME_VERSION
         );
         wp_enqueue_script(
             'shopeame-admin',
-            plugins_url( 'assets/shopeame-admin.js', $base_file ),
+            plugins_url( 'assets/shopeame-admin.js', SHOPEAME_PLUGIN_FILE ),
             array(),
-            (string) filemtime( dirname( __DIR__ ) . '/assets/shopeame-admin.js' ),
+            SHOPEAME_VERSION,
             true
         );
     }
@@ -71,11 +82,15 @@ class shopeame_menu {
      * @return void
      */
     function shopeameSettings() {
+        if ( ! current_user_can( self::CAPABILITY ) ) {
+            return;
+        }
+
         // procesamos las acciones del formulario antes de pintar la pantalla
         $this->handleActions();
 
         echo '<div class="wrap shopeame-page">';
-        echo '<h1>Conectar con shopea.me</h1>';
+        echo '<h1>' . esc_html__( 'Connect with shopea.me', 'shopeame' ) . '</h1>';
         // los avisos de otros plugins se colocan aquí; el nuestro lleva la clase "inline" para no moverse
         echo '<hr class="wp-header-end">';
 
@@ -94,62 +109,68 @@ class shopeame_menu {
      * @return void
      */
     private function renderNotLinkedView() {
-        $api_user = get_option( 'shopeame_api_user', '' );
-        $api_key  = get_option( 'shopeame_api_key', '' );
+        $api_user = (string) get_option( SHOPEAME_OPTION_API_USER, '' );
+        $api_key  = (string) get_option( SHOPEAME_OPTION_API_KEY, '' );
+        $shopeame = $this->externalLink( 'https://shopea.me', 'shopea.me' );
         ?>
         <div class="shopeame-section">
-            <h2>Tu tienda ya está lista para conectar 🎉</h2>
-            <p>Este plugin actúa de conector entre tu tienda de WooCommerce y
-                <a href="https://shopea.me" target="_blank">shopea.me</a>. Para conectar la tienda online con
-                shopea.me necesitas tener previamente registrado tu ERP en
-                <a href="https://shopea.me" target="_blank">shopea.me</a>. Una vez registrado, tienes dos formas
-                de vincular esta tienda.</p>
+            <h2><?php esc_html_e( 'Your store is ready to connect 🎉', 'shopeame' ); ?></h2>
+            <p>
+                <?php
+                echo wp_kses_post(
+                    sprintf(
+                        /* translators: %s: link to shopea.me */
+                        __( 'This plugin connects your WooCommerce store with %s. To connect the store you first need to register your ERP on shopea.me. Once registered, there are two ways to link this store.', 'shopeame' ),
+                        $shopeame
+                    )
+                );
+                ?>
+            </p>
         </div>
 
         <?php $this->renderResultBanner(); ?>
 
         <div class="shopeame-section">
-            <h2>Opción 1: copiar los datos en shopea.me</h2>
-            <p>Copia los datos de abajo y pégalos en shopea.me al conectar una tienda de tipo WooCommerce.</p>
+            <h2><?php esc_html_e( 'Option 1: copy the data into shopea.me', 'shopeame' ); ?></h2>
+            <p><?php esc_html_e( 'Copy the data below and paste it into shopea.me when connecting a WooCommerce store.', 'shopeame' ); ?></p>
             <div class="shopeame-stack">
                 <?php
-                $this->renderCredentialField( 'shopeame-url', 'URL de la tienda', get_site_url() );
-                $this->renderCredentialField( 'shopeame-ck', 'Clave del cliente (Consumer key)', $api_user );
+                $this->renderCredentialField( 'shopeame-url', __( 'Store URL', 'shopeame' ), get_site_url() );
+                $this->renderCredentialField( 'shopeame-ck', __( 'Consumer key', 'shopeame' ), $api_user );
                 $this->renderCredentialField(
                     'shopeame-cs',
-                    'Clave secreta (Consumer secret)',
+                    __( 'Consumer secret', 'shopeame' ),
                     $api_key,
-                    'Trata estas claves como una contraseña: cualquiera con ellas puede leer los pedidos y productos de tu tienda a través de la API de WooCommerce.'
+                    __( 'Treat these keys like a password: anyone who has them can read the orders and products of your store through the WooCommerce API.', 'shopeame' )
                 );
                 ?>
             </div>
             <form method="post" action="">
-                <?php wp_nonce_field( 'shopeame_action' ); ?>
+                <?php wp_nonce_field( self::NONCE_ACTION ); ?>
                 <input type="hidden" name="shopeame_action" value="generate_keys">
                 <button type="submit" class="button">
-                    <?php echo esc_html( $api_user !== '' ? 'Regenerar claves API' : 'Generar claves API' ); ?>
+                    <?php echo esc_html( $api_user !== '' ? __( 'Regenerate API keys', 'shopeame' ) : __( 'Generate API keys', 'shopeame' ) ); ?>
                 </button>
             </form>
         </div>
 
         <div class="shopeame-section">
-            <h2>Opción 2: vincular indicando tu ERP</h2>
-            <p>Introduce el UUID y el token de tu ERP (los obtienes en shopea.me una vez registrado el ERP) y
-                vincularemos esta tienda automáticamente.</p>
+            <h2><?php esc_html_e( 'Option 2: link using your ERP details', 'shopeame' ); ?></h2>
+            <p><?php esc_html_e( 'Enter the UUID and token of your ERP (you get them on shopea.me once the ERP is registered) and this store will be linked automatically.', 'shopeame' ); ?></p>
             <form method="post" action="">
-                <?php wp_nonce_field( 'shopeame_action' ); ?>
+                <?php wp_nonce_field( self::NONCE_ACTION ); ?>
                 <input type="hidden" name="shopeame_action" value="link">
                 <div class="shopeame-stack">
                     <div class="shopeame-field">
-                        <label class="shopeame-field-label" for="erp_field">UUID del ERP</label>
+                        <label class="shopeame-field-label" for="erp_field"><?php esc_html_e( 'ERP UUID', 'shopeame' ); ?></label>
                         <input name="erp" type="text" id="erp_field" required>
                     </div>
                     <div class="shopeame-field">
-                        <label class="shopeame-field-label" for="token_field">Token del ERP</label>
+                        <label class="shopeame-field-label" for="token_field"><?php esc_html_e( 'ERP token', 'shopeame' ); ?></label>
                         <input name="token" type="text" id="token_field" required>
                     </div>
                 </div>
-                <button type="submit" class="button button-primary">Vincular tienda</button>
+                <button type="submit" class="button button-primary"><?php esc_html_e( 'Link store', 'shopeame' ); ?></button>
             </form>
         </div>
         <?php
@@ -161,37 +182,47 @@ class shopeame_menu {
      * @return void
      */
     private function renderLinkedView() {
-        $shop_link_url = shopeame_server_url() . '/shop-link/' . get_option( 'shop_uuid', '' );
+        $shop_link_url = shopeame_server_url() . '/shop-link/' . rawurlencode( (string) get_option( SHOPEAME_OPTION_SHOP_UUID, '' ) );
         ?>
         <div class="shopeame-section">
-            <h2>Tienda vinculada ✅</h2>
-            <p>La tienda <strong><?php echo esc_html( get_site_url() ); ?></strong> está vinculada con
-                <a href="https://shopea.me" target="_blank">shopea.me</a>. Sus pedidos se sincronizan
-                automáticamente.
-                <a href="<?php echo esc_url( $shop_link_url ); ?>" target="_blank">Ver la tienda en shopea.me</a></p>
+            <h2><?php esc_html_e( 'Store linked ✅', 'shopeame' ); ?></h2>
+            <p>
+                <?php
+                echo wp_kses_post(
+                    sprintf(
+                        /* translators: 1: store URL, 2: link to shopea.me */
+                        __( 'The store %1$s is linked with %2$s. Its orders are synced automatically.', 'shopeame' ),
+                        '<strong>' . esc_html( get_site_url() ) . '</strong>',
+                        $this->externalLink( 'https://shopea.me', 'shopea.me' )
+                    )
+                );
+                echo ' ';
+                echo wp_kses_post( $this->externalLink( $shop_link_url, __( 'View the store on shopea.me', 'shopeame' ) ) );
+                ?>
+            </p>
         </div>
 
         <?php $this->renderResultBanner(); ?>
 
         <div class="shopeame-section">
-            <h2>Acciones</h2>
+            <h2><?php esc_html_e( 'Actions', 'shopeame' ); ?></h2>
             <div class="shopeame-actions">
                 <form method="post" action="">
-                    <?php wp_nonce_field( 'shopeame_action' ); ?>
+                    <?php wp_nonce_field( self::NONCE_ACTION ); ?>
                     <input type="hidden" name="shopeame_action" value="check">
-                    <button type="submit" class="button">Comprobar conexión</button>
+                    <button type="submit" class="button"><?php esc_html_e( 'Check connection', 'shopeame' ); ?></button>
                 </form>
                 <form method="post" action=""
-                      data-shopeame-confirm="Esta acción desvinculará la tienda de Shopeame. ¿Quieres continuar?">
-                    <?php wp_nonce_field( 'shopeame_action' ); ?>
+                      data-shopeame-confirm="<?php esc_attr_e( 'This will unlink the store from Shopeame. Do you want to continue?', 'shopeame' ); ?>">
+                    <?php wp_nonce_field( self::NONCE_ACTION ); ?>
                     <input type="hidden" name="shopeame_action" value="unlink">
-                    <button type="submit" class="button shopeame-button-critical">Desvincular tienda</button>
+                    <button type="submit" class="button shopeame-button-critical"><?php esc_html_e( 'Unlink store', 'shopeame' ); ?></button>
                 </form>
                 <form method="post" action=""
-                      data-shopeame-confirm="Esta acción solo borrará los datos de conexión guardados en la app y no modificará Shopeame. ¿Quieres continuar?">
-                    <?php wp_nonce_field( 'shopeame_action' ); ?>
+                      data-shopeame-confirm="<?php esc_attr_e( 'This will only delete the connection data saved in this plugin and will not change Shopeame. Do you want to continue?', 'shopeame' ); ?>">
+                    <?php wp_nonce_field( self::NONCE_ACTION ); ?>
                     <input type="hidden" name="shopeame_action" value="clear_local">
-                    <button type="submit" class="button shopeame-button-critical-secondary">Borrar datos de la app</button>
+                    <button type="submit" class="button shopeame-button-critical-secondary"><?php esc_html_e( 'Delete plugin data', 'shopeame' ); ?></button>
                 </form>
             </div>
         </div>
@@ -217,9 +248,9 @@ class shopeame_menu {
                 <?php if ( $value !== '' ) { ?>
                     <code class="shopeame-field-value" id="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $value ); ?></code>
                     <button type="button" class="button" data-shopeame-copy="<?php echo esc_attr( $id ); ?>"
-                            data-shopeame-copied="Copiado">Copiar</button>
+                            data-shopeame-copied="<?php esc_attr_e( 'Copied', 'shopeame' ); ?>"><?php esc_html_e( 'Copy', 'shopeame' ); ?></button>
                 <?php } else { ?>
-                    <span class="shopeame-field-value shopeame-field-empty">Pulsa «Generar claves API» para crearla</span>
+                    <span class="shopeame-field-value shopeame-field-empty"><?php esc_html_e( 'Click “Generate API keys” to create it', 'shopeame' ); ?></span>
                 <?php } ?>
             </div>
             <?php if ( $hint !== '' ) { ?>
@@ -250,7 +281,24 @@ class shopeame_menu {
     }
 
     /**
+     * Devuelve el HTML de un enlace externo que se abre en una pestaña nueva.
+     *
+     * @param string $url  URL de destino.
+     * @param string $text Texto visible del enlace.
+     * @return string HTML ya escapado.
+     */
+    private function externalLink( $url, $text ) {
+        return sprintf(
+            '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+            esc_url( $url ),
+            esc_html( $text )
+        );
+    }
+
+    /**
      * Procesa las acciones de configuración y conexión enviadas por POST.
+     *
+     * Comprueba el nonce y la capacidad del usuario antes de leer ningún otro dato del formulario.
      *
      * @return void
      */
@@ -258,18 +306,21 @@ class shopeame_menu {
         if ( empty( $_POST['shopeame_action'] ) ) {
             return;
         }
-        if ( ! check_admin_referer( 'shopeame_action' ) ) {
+        check_admin_referer( self::NONCE_ACTION );
+        if ( ! current_user_can( self::CAPABILITY ) ) {
             return;
         }
 
-        $action = sanitize_text_field( wp_unslash( $_POST['shopeame_action'] ) );
+        $action = sanitize_key( wp_unslash( $_POST['shopeame_action'] ) );
 
         switch ( $action ) {
             case 'generate_keys':
                 $this->actionGenerateKeys();
                 break;
             case 'link':
-                $this->actionLink();
+                $erp   = isset( $_POST['erp'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['erp'] ) ) ) : '';
+                $token = isset( $_POST['token'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['token'] ) ) ) : '';
+                $this->actionLink( $erp, $token );
                 break;
             case 'check':
                 $this->actionCheck();
@@ -283,80 +334,104 @@ class shopeame_menu {
         }
     }
 
+    /**
+     * Genera (o regenera) las claves de la API REST de WooCommerce que usa shopea.me.
+     *
+     * @return void
+     */
     private function actionGenerateKeys() {
         if ( shopeame_generate_api_keys() ) {
-            $this->notice( 'success', 'Claves API generadas correctamente.' );
+            $this->notice( 'success', __( 'API keys generated successfully.', 'shopeame' ) );
         } else {
-            $this->notice( 'error', 'No se pudieron generar las claves API. ¿Está activo WooCommerce?' );
+            $this->notice( 'error', __( 'The API keys could not be generated. Is WooCommerce active?', 'shopeame' ) );
         }
     }
 
-    private function actionLink() {
-        $erp   = isset( $_POST['erp'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['erp'] ) ) ) : '';
-        $token = isset( $_POST['token'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['token'] ) ) ) : '';
+    /**
+     * Registra la tienda en shopea.me con el UUID y el token del ERP, y guarda las credenciales devueltas.
+     *
+     * @param string $erp   UUID del ERP en shopea.me.
+     * @param string $token Token del ERP en shopea.me.
+     * @return void
+     */
+    private function actionLink( $erp, $token ) {
         if ( $erp === '' || $token === '' ) {
-            $this->notice( 'error', 'Introduce el UUID y el token del ERP.' );
+            $this->notice( 'error', __( 'Enter the ERP UUID and token.', 'shopeame' ) );
             return;
         }
 
         // generamos las claves API si aún no existen
-        if ( get_option( 'shopeame_api_user', '' ) === '' || get_option( 'shopeame_api_key', '' ) === '' ) {
+        if ( get_option( SHOPEAME_OPTION_API_USER, '' ) === '' || get_option( SHOPEAME_OPTION_API_KEY, '' ) === '' ) {
             if ( ! shopeame_generate_api_keys() ) {
-                $this->notice( 'error', 'No se pudieron generar las claves API. ¿Está activo WooCommerce?' );
+                $this->notice( 'error', __( 'The API keys could not be generated. Is WooCommerce active?', 'shopeame' ) );
                 return;
             }
         }
 
-        $result = shopeame_post_webhook( array(
-            'event'    => 'register_woocommerce',
-            'erp'      => $erp,
-            'token'    => $token,
-            'new_shop' => array(
-                'url'      => get_site_url(),
-                'api_user' => get_option( 'shopeame_api_user', '' ),
-                'api_key'  => get_option( 'shopeame_api_key', '' ),
-            ),
-        ) );
+        $result = shopeame_post_webhook(
+            array(
+                'event'    => 'register_woocommerce',
+                'erp'      => $erp,
+                'token'    => $token,
+                'new_shop' => array(
+                    'url'      => get_site_url(),
+                    'api_user' => get_option( SHOPEAME_OPTION_API_USER, '' ),
+                    'api_key'  => get_option( SHOPEAME_OPTION_API_KEY, '' ),
+                ),
+            )
+        );
 
-        if ( $result['ok'] && isset( $result['data']['shop_uuid'], $result['data']['webhook_token'] ) ) {
-            update_option( 'shop_uuid', $result['data']['shop_uuid'] );
-            update_option( 'webhook_token', $result['data']['webhook_token'] );
+        if ( $result['ok']
+            && shopeame_save_link_credentials( $result['data']['shop_uuid'] ?? '', $result['data']['webhook_token'] ?? '' ) ) {
             $this->notice( 'success', $this->linkSuccessMessage( $result['data']['message'] ?? '' ) );
         } else {
-            $this->notice( 'error', 'No se pudo vincular la tienda. Revisa que el UUID y el token del ERP sean correctos.' );
+            $this->notice( 'error', __( 'The store could not be linked. Check that the ERP UUID and token are correct.', 'shopeame' ) );
         }
     }
 
+    /**
+     * Comprueba con shopea.me que la tienda sigue vinculada.
+     *
+     * @return void
+     */
     private function actionCheck() {
-        $result = shopeame_post_webhook( array(
-            'event' => 'check_shop',
-            'shop'  => get_option( 'shop_uuid', '' ),
-            'token' => get_option( 'webhook_token', '' ),
-        ) );
+        $result = shopeame_post_webhook(
+            array(
+                'event' => 'check_shop',
+                'shop'  => get_option( SHOPEAME_OPTION_SHOP_UUID, '' ),
+                'token' => get_option( SHOPEAME_OPTION_WEBHOOK_TOKEN, '' ),
+            )
+        );
 
         if ( $result['ok'] && ! empty( $result['data']['exists'] ) ) {
-            $this->notice( 'success', 'La conexión con shopea.me funciona correctamente.' );
+            $this->notice( 'success', __( 'The connection with shopea.me is working correctly.', 'shopeame' ) );
         } else {
-            $this->notice( 'error', 'No se pudo confirmar la conexión con shopea.me.' );
+            $this->notice( 'error', __( 'The connection with shopea.me could not be confirmed.', 'shopeame' ) );
         }
     }
 
+    /**
+     * Desvincula la tienda en shopea.me y borra las credenciales locales.
+     *
+     * @return void
+     */
     private function actionUnlink() {
-        $result = shopeame_post_webhook( array(
-            'event' => 'unlink_shop',
-            'shop'  => get_option( 'shop_uuid', '' ),
-            'token' => get_option( 'webhook_token', '' ),
-        ) );
+        $result = shopeame_post_webhook(
+            array(
+                'event' => 'unlink_shop',
+                'shop'  => get_option( SHOPEAME_OPTION_SHOP_UUID, '' ),
+                'token' => get_option( SHOPEAME_OPTION_WEBHOOK_TOKEN, '' ),
+            )
+        );
 
         // borramos las credenciales locales aunque el servidor falle, para no dejar la tienda
         // en un estado intermedio; el usuario siempre podrá volver a vincularla
-        update_option( 'shop_uuid', '' );
-        update_option( 'webhook_token', '' );
+        shopeame_clear_link_credentials();
 
         if ( $result['ok'] ) {
-            $this->notice( 'success', 'Tienda desvinculada de shopea.me.' );
+            $this->notice( 'success', __( 'Store unlinked from shopea.me.', 'shopeame' ) );
         } else {
-            $this->notice( 'warning', 'Se borraron las credenciales locales, pero shopea.me no confirmó la desvinculación.' );
+            $this->notice( 'warning', __( 'The local credentials were deleted, but shopea.me did not confirm the unlinking.', 'shopeame' ) );
         }
     }
 
@@ -368,10 +443,9 @@ class shopeame_menu {
      * @return void
      */
     private function actionClearLocal() {
-        update_option( 'shop_uuid', '' );
-        update_option( 'webhook_token', '' );
+        shopeame_clear_link_credentials();
 
-        $this->notice( 'success', 'Se borraron los datos de conexión de la app sin modificar ShopeameServer.' );
+        $this->notice( 'success', __( 'The connection data saved in this plugin was deleted without changing shopea.me.', 'shopeame' ) );
     }
 
     /**
@@ -396,11 +470,11 @@ class shopeame_menu {
      */
     private function linkSuccessMessage( $message ) {
         if ( $message === 'shop-already-exists' ) {
-            return 'La tienda ya estaba vinculada. Se recuperaron sus datos sin crear una tienda nueva.';
+            return __( 'The store was already linked. Its data was recovered without creating a new store.', 'shopeame' );
         }
         if ( $message === 'shop-reactivated' ) {
-            return 'La tienda se reactivó y quedó vinculada con shopea.me correctamente.';
+            return __( 'The store was reactivated and linked with shopea.me successfully.', 'shopeame' );
         }
-        return 'Tienda vinculada con shopea.me correctamente.';
+        return __( 'Store linked with shopea.me successfully.', 'shopeame' );
     }
 }

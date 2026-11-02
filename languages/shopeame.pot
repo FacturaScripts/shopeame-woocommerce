@@ -1,0 +1,219 @@
+# Shopeame
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Shopeame package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Shopeame 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/shopeame\n"
+"POT-Creation-Date: 2026-11-02 17:49+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: includes/shopeame_link_endpoint.php:51
+#: includes/shopeame_link_endpoint.php:56
+msgid "Unauthorized signature."
+msgstr ""
+
+#: includes/shopeame_link_endpoint.php:71
+msgid "Invalid JSON."
+msgstr ""
+
+#: includes/shopeame_link_endpoint.php:79
+msgid "Invalid link data."
+msgstr ""
+
+#: includes/shopeame_menu.php:93
+msgid "Connect with shopea.me"
+msgstr ""
+
+#: includes/shopeame_menu.php:117
+msgid "Your store is ready to connect 🎉"
+msgstr ""
+
+#. translators: %s: link to shopea.me
+#: includes/shopeame_menu.php:123
+#, php-format
+msgid ""
+"This plugin connects your WooCommerce store with %s. To connect the store "
+"you first need to register your ERP on shopea.me. Once registered, there are "
+"two ways to link this store."
+msgstr ""
+
+#: includes/shopeame_menu.php:134
+msgid "Option 1: copy the data into shopea.me"
+msgstr ""
+
+#: includes/shopeame_menu.php:135
+msgid ""
+"Copy the data below and paste it into shopea.me when connecting a "
+"WooCommerce store."
+msgstr ""
+
+#: includes/shopeame_menu.php:138
+msgid "Store URL"
+msgstr ""
+
+#: includes/shopeame_menu.php:139
+msgid "Consumer key"
+msgstr ""
+
+#: includes/shopeame_menu.php:142
+msgid "Consumer secret"
+msgstr ""
+
+#: includes/shopeame_menu.php:144
+msgid ""
+"Treat these keys like a password: anyone who has them can read the orders "
+"and products of your store through the WooCommerce API."
+msgstr ""
+
+#: includes/shopeame_menu.php:152
+msgid "Generate API keys"
+msgstr ""
+
+#: includes/shopeame_menu.php:152
+msgid "Regenerate API keys"
+msgstr ""
+
+#: includes/shopeame_menu.php:158
+msgid "Option 2: link using your ERP details"
+msgstr ""
+
+#: includes/shopeame_menu.php:159
+msgid ""
+"Enter the UUID and token of your ERP (you get them on shopea.me once the ERP "
+"is registered) and this store will be linked automatically."
+msgstr ""
+
+#: includes/shopeame_menu.php:165
+msgid "ERP UUID"
+msgstr ""
+
+#: includes/shopeame_menu.php:169
+msgid "ERP token"
+msgstr ""
+
+#: includes/shopeame_menu.php:173
+msgid "Link store"
+msgstr ""
+
+#: includes/shopeame_menu.php:188
+msgid "Store linked ✅"
+msgstr ""
+
+#. translators: 1: store URL, 2: link to shopea.me
+#: includes/shopeame_menu.php:194
+#, php-format
+msgid ""
+"The store %1$s is linked with %2$s. Its orders are synced automatically."
+msgstr ""
+
+#: includes/shopeame_menu.php:200
+msgid "View the store on shopea.me"
+msgstr ""
+
+#: includes/shopeame_menu.php:208
+msgid "Actions"
+msgstr ""
+
+#: includes/shopeame_menu.php:213
+msgid "Check connection"
+msgstr ""
+
+#: includes/shopeame_menu.php:216
+msgid "This will unlink the store from Shopeame. Do you want to continue?"
+msgstr ""
+
+#: includes/shopeame_menu.php:219
+msgid "Unlink store"
+msgstr ""
+
+#: includes/shopeame_menu.php:222
+msgid ""
+"This will only delete the connection data saved in this plugin and will not "
+"change Shopeame. Do you want to continue?"
+msgstr ""
+
+#: includes/shopeame_menu.php:225
+msgid "Delete plugin data"
+msgstr ""
+
+#: includes/shopeame_menu.php:251
+msgid "Copied"
+msgstr ""
+
+#: includes/shopeame_menu.php:251
+msgid "Copy"
+msgstr ""
+
+#: includes/shopeame_menu.php:253
+msgid "Click “Generate API keys” to create it"
+msgstr ""
+
+#: includes/shopeame_menu.php:344
+msgid "API keys generated successfully."
+msgstr ""
+
+#: includes/shopeame_menu.php:346 includes/shopeame_menu.php:366
+msgid "The API keys could not be generated. Is WooCommerce active?"
+msgstr ""
+
+#: includes/shopeame_menu.php:359
+msgid "Enter the ERP UUID and token."
+msgstr ""
+
+#: includes/shopeame_menu.php:388
+msgid ""
+"The store could not be linked. Check that the ERP UUID and token are correct."
+msgstr ""
+
+#: includes/shopeame_menu.php:407
+msgid "The connection with shopea.me is working correctly."
+msgstr ""
+
+#: includes/shopeame_menu.php:409
+msgid "The connection with shopea.me could not be confirmed."
+msgstr ""
+
+#: includes/shopeame_menu.php:432
+msgid "Store unlinked from shopea.me."
+msgstr ""
+
+#: includes/shopeame_menu.php:434
+msgid ""
+"The local credentials were deleted, but shopea.me did not confirm the "
+"unlinking."
+msgstr ""
+
+#: includes/shopeame_menu.php:448
+msgid ""
+"The connection data saved in this plugin was deleted without changing shopea."
+"me."
+msgstr ""
+
+#: includes/shopeame_menu.php:473
+msgid ""
+"The store was already linked. Its data was recovered without creating a new "
+"store."
+msgstr ""
+
+#: includes/shopeame_menu.php:476
+msgid "The store was reactivated and linked with shopea.me successfully."
+msgstr ""
+
+#: includes/shopeame_menu.php:478
+msgid "Store linked with shopea.me successfully."
+msgstr ""
+
+#. Description of the plugin
+#: shopeame.php
+msgid "Connects your WooCommerce store with shopea.me to sync orders with your FacturaScripts ERP."
+msgstr ""
