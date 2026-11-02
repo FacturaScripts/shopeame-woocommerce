@@ -21,12 +21,24 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_nuevo_pedido.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_modificar_pedido.php';
 
 add_action( 'admin_menu', 'shopeame_add_menu' );
+add_action( 'admin_enqueue_scripts', 'shopeame_enqueue_admin_assets' );
 add_action( 'woocommerce_new_order', 'shopeame_crear_pedido', 10, 1 );
 add_action('woocommerce_update_order', 'shopeame_modificar_pedido', 10, 1);
 
 function shopeame_add_menu(){
     $shopeame_menu = new shopeame_menu();
     $shopeame_menu->shopeame_add_menu();
+}
+
+/**
+ * Encola los estilos y el script de la pantalla de administración de Shopeame.
+ *
+ * @param string $hook_suffix Sufijo del hook de la página de administración actual.
+ * @return void
+ */
+function shopeame_enqueue_admin_assets( $hook_suffix ) {
+    $shopeame_menu = new shopeame_menu();
+    $shopeame_menu->shopeame_enqueue_assets( $hook_suffix );
 }
 
 function shopeame_crear_pedido( $IDpedido ) {
