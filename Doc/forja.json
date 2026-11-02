@@ -1,0 +1,106 @@
+{
+    "User": {
+        "como-funciona-shopeame-para-woocommerce.md": {
+            "title": "Cómo funciona el plugin Shopeame para WooCommerce",
+            "title_short": "Cómo funciona Shopeame para WooCommerce",
+            "permalink": "como-funciona-shopeame-para-woocommerce",
+            "ordernum": 10,
+            "imageurl": "Doc/Assets/como-vincular-la-tienda-copiando-los-datos-en-shopeame/04-tienda-vinculada.png",
+            "icon": "fa-solid fa-circle-info",
+            "color": "primary",
+            "keywords": "shopeame, woocommerce, wordpress, shopea.me, sincronizar pedidos, tienda online, erp, cómo funciona",
+            "visibility": true
+        },
+        "como-instalar-el-plugin-shopeame.md": {
+            "title": "Cómo instalar el plugin Shopeame en WordPress",
+            "title_short": "Instalar Shopeame en WordPress",
+            "permalink": "como-instalar-el-plugin-shopeame",
+            "parent": "como-funciona-shopeame-para-woocommerce.md",
+            "ordernum": 20,
+            "imageurl": "Doc/Assets/como-instalar-el-plugin-shopeame/02-menu-shopeame.png",
+            "icon": "fa-brands fa-wordpress",
+            "color": "info",
+            "keywords": "instalar, activar, plugin, shopeame, wordpress, woocommerce, menú shopeame",
+            "visibility": true
+        },
+        "como-vincular-la-tienda-copiando-los-datos-en-shopeame.md": {
+            "title": "Cómo vincular la tienda copiando los datos en shopea.me",
+            "title_short": "Vincular copiando los datos",
+            "permalink": "como-vincular-la-tienda-copiando-los-datos-en-shopeame",
+            "parent": "como-funciona-shopeame-para-woocommerce.md",
+            "ordernum": 30,
+            "imageurl": "Doc/Assets/como-vincular-la-tienda-copiando-los-datos-en-shopeame/02-copiar-url-y-claves.png",
+            "icon": "fa-solid fa-key",
+            "color": "success",
+            "keywords": "vincular, conectar tienda, claves api, consumer key, consumer secret, generar claves, woocommerce, shopea.me",
+            "visibility": true
+        },
+        "como-vincular-la-tienda-con-el-uuid-y-el-token-del-erp.md": {
+            "title": "Cómo vincular la tienda con el UUID y el token del ERP",
+            "title_short": "Vincular con el UUID y el token del ERP",
+            "permalink": "como-vincular-la-tienda-con-el-uuid-y-el-token-del-erp",
+            "parent": "como-funciona-shopeame-para-woocommerce.md",
+            "ordernum": 40,
+            "imageurl": "Doc/Assets/como-vincular-la-tienda-con-el-uuid-y-el-token-del-erp/02-vincular-tienda.png",
+            "icon": "fa-solid fa-link",
+            "color": "success",
+            "keywords": "vincular, conectar tienda, uuid del erp, token del erp, vincular tienda, woocommerce, shopea.me",
+            "visibility": true
+        },
+        "como-comprobar-desvincular-o-borrar-los-datos-de-la-tienda.md": {
+            "title": "Cómo comprobar, desvincular o borrar los datos de la tienda",
+            "title_short": "Comprobar o desvincular la tienda",
+            "permalink": "como-comprobar-desvincular-o-borrar-los-datos-de-la-tienda",
+            "parent": "como-funciona-shopeame-para-woocommerce.md",
+            "ordernum": 50,
+            "imageurl": "Doc/Assets/como-comprobar-desvincular-o-borrar-los-datos-de-la-tienda/01-acciones-de-la-tienda.png",
+            "icon": "fa-solid fa-plug",
+            "color": "warning",
+            "keywords": "comprobar conexión, desvincular tienda, borrar datos de la app, regenerar claves api, shopeame, woocommerce",
+            "visibility": true
+        },
+        "como-resolver-los-errores-de-shopeame-en-woocommerce.md": {
+            "title": "Cómo resolver los errores de Shopeame en WooCommerce",
+            "title_short": "Errores de Shopeame en WooCommerce",
+            "permalink": "como-resolver-los-errores-de-shopeame-en-woocommerce",
+            "parent": "como-funciona-shopeame-para-woocommerce.md",
+            "ordernum": 60,
+            "icon": "fa-solid fa-triangle-exclamation",
+            "color": "danger",
+            "keywords": "errores, no se vincula, pedidos no llegan, registros, 401, claves api, comprobar conexión, shopeame, woocommerce",
+            "visibility": true
+        }
+    },
+    "Dev": {
+        "endpoint-de-vinculacion-de-shopeame-para-woocommerce.md": {
+            "title": "Endpoint de vinculación de Shopeame para WooCommerce",
+            "title_short": "Endpoint de vinculación",
+            "permalink": "endpoint-de-vinculacion-de-shopeame-para-woocommerce",
+            "ordernum": 10,
+            "icon": "fa-solid fa-code",
+            "color": "dark",
+            "keywords": "api rest, endpoint, wp-json, shopeame/v1/link, hmac, firma, vinculación, shopeameserver",
+            "visibility": true
+        },
+        "eventos-que-envia-shopeame-para-woocommerce.md": {
+            "title": "Eventos que envía Shopeame para WooCommerce",
+            "title_short": "Eventos que envía el plugin",
+            "permalink": "eventos-que-envia-shopeame-para-woocommerce",
+            "ordernum": 20,
+            "icon": "fa-solid fa-paper-plane",
+            "color": "dark",
+            "keywords": "webhooks, eventos, register_woocommerce, new_order, update_order, check_shop, unlink_shop, opciones, shopeame_server_url",
+            "visibility": true
+        },
+        "como-desarrollar-y-publicar-shopeame-para-woocommerce.md": {
+            "title": "Cómo desarrollar y publicar Shopeame para WooCommerce",
+            "title_short": "Desarrollar y publicar el plugin",
+            "permalink": "como-desarrollar-y-publicar-shopeame-para-woocommerce",
+            "ordernum": 30,
+            "icon": "fa-solid fa-screwdriver-wrench",
+            "color": "dark",
+            "keywords": "desarrollo, pruebas, shopeame_server_url, traducciones, plugin check, wordpress.org, publicar versión, zip",
+            "visibility": true
+        }
+    }
+}

@@ -1,0 +1,24 @@
+# sistema operativo
+.DS_Store
+Thumbs.db
+
+# editores
+/.idea/
+.vscode
+*.code-workspace
+
+# zip del plugin: lo genera build.sh fuera del repositorio
+*.zip
+
+# traducciones compiladas: el plugin no las incluye (ver Doc/Context/Decisiones/0002)
+/languages/*.mo
+/languages/*.l10n.php
+
+# IA: lo local de Claude Code y de Codex no se versiona; sí sus skills (.agents/skills, con enlace desde .claude/skills)
+/.claude/*
+!/.claude/skills
+/.agents/*
+!/.agents/skills
+/CLAUDE.local.md
+/AGENTS.override.md
+__pycache__/
