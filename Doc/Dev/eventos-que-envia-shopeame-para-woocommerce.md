@@ -1,14 +1,15 @@
 El plugin se comunica con shopea.me enviando eventos JSON por `POST` a `<servidor>/WebHooks`, donde los recibe el
 controlador **`WebHooks`** del plugin ShopeameServer (`Controller/WebHooks.php`). El servidor es `https://shopea.me` salvo
 que se defina la constante `SHOPEAME_SERVER_URL`. Todos los envíos pasan por `shopeame_post_webhook()`
-(`includes/shopeame_helpers.php`), que usa `wp_remote_post()` con 20 segundos de espera y verificación TLS.
+(`includes/shopeame_helpers.php`), que usa `wp_remote_post()` con 20 segundos de espera (10 en la comprobación al
+abrir la página) y verificación TLS.
 
 ## 1. Eventos de la vinculación
 
 | Evento | Cuándo | Campos | Autenticación |
 |---|---|---|---|
 | `register_woocommerce` | Al pulsar **Vincular tienda** | `erp`, `token` y `new_shop` (`url`, `api_user`, `api_key`) | UUID y token del ERP |
-| `check_shop` | Al pulsar **Comprobar conexión** | `shop`, `token` | UUID y token de la tienda |
+| `check_shop` | Al abrir la página **Shopeame** y al pulsar **Comprobar conexión** | `shop`, `token` | UUID y token de la tienda |
 | `unlink_shop` | Al pulsar **Desvincular tienda** | `shop`, `token` | UUID y token de la tienda |
 
 Ejemplo de `register_woocommerce`:
@@ -28,7 +29,9 @@ Ejemplo de `register_woocommerce`:
 
 La respuesta trae `shop_uuid`, `webhook_token` y `message`: `shop-registered` (tienda nueva), `shop-already-exists`
 (ya existía y está activa; no se cambia nada) o `shop-reactivated` (existía desvinculada y se reactiva con las claves
-nuevas). `check_shop` responde `{"exists": true}` y `unlink_shop` da de baja la tienda en el servidor.
+nuevas). `check_shop` responde `{"exists": true}` si la tienda está vinculada y `{"exists": false}` si está
+desvinculada (`404`, `shop-unlinked`) o el token no es válido (`401`); `unlink_shop` da de baja la tienda en el
+servidor.
 
 ## 2. Eventos de pedidos
 

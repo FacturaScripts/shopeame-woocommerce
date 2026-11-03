@@ -120,6 +120,10 @@ msgstr ""
 msgid "View the store on shopea.me"
 msgstr ""
 
+#: includes/shopeame_menu.php:224
+msgid "Could not connect to shopea.me to confirm that the store is linked."
+msgstr ""
+
 #: includes/shopeame_menu.php:208
 msgid "Actions"
 msgstr ""

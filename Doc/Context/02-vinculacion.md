@@ -39,9 +39,19 @@ token del ERP y `new_shop` (`url`, `api_user`, `api_key`). El servidor:
 En los tres casos el plugin guarda `shop_uuid` y `webhook_token` si tienen el formato esperado
 (`shopeame_save_link_credentials()`) y muestra el mensaje correspondiente.
 
-## 2.4 Comprobar, desvincular y borrar datos
+## 2.4 Estado de la pantalla
 
-- **Comprobar conexión**: evento `check_shop`; el servidor responde `exists: true` si la tienda y su token son válidos.
+Al abrir la página **Shopeame**, si hay UUID y token de la tienda, `shopeame_check_link_state()` envía `check_shop`
+(10 segundos de espera) y el campo `exists` de la respuesta decide si se pinta la vista vinculada o la de vincular. Así,
+una tienda desvinculada desde su ficha en shopea.me (el servidor responde `404 {"error": "shop-unlinked", "exists":
+false}`) deja de mostrarse como vinculada, igual que en los conectores de PrestaShop y Shopify. Las credenciales no se
+borran: se sustituyen al volver a vincular. Si shopea.me no responde o la respuesta no trae `exists`, se mantiene la
+vista vinculada con un aviso de que no se pudo confirmar.
+
+## 2.5 Comprobar, desvincular y borrar datos
+
+- **Comprobar conexión**: evento `check_shop`; el servidor responde `exists: true` si la tienda y su token son válidos y
+  `exists: false` si la tienda está desvinculada (`404`, `shop-unlinked`) o el token no es válido (`401`).
 - **Desvincular**: evento `unlink_shop`, que en el servidor hace `softDelete()` de la tienda (estado `deleted`).
   El plugin borra sus credenciales locales aunque el servidor falle, para no quedarse a medias, y avisa con un aviso
   de advertencia si no hubo confirmación.
