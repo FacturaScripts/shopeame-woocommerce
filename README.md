@@ -91,7 +91,7 @@ usa `https://shopea.me` (producción). Para apuntar a una instalación local, de
 `wp-config.php`:
 
 ```php
-define('SHOPEAME_SERVER_URL', 'https://localshopea.danielfg.es');
+define('SHOPEAME_SERVER_URL', 'https://shopea.localhost');
 ```
 
 Las peticiones usan la API HTTP de WordPress (`wp_remote_post`), que **siempre verifica el
