@@ -1,0 +1,119 @@
+# Crea la release de GitHub del plugin a partir de la versión de shopeame.php.
+#
+# Adaptada de la plantilla de fsmaker (github-action-release.yml.sample) para un plugin de WordPress:
+# - La versión sale de la cabecera «Version» de shopeame.php y debe coincidir con SHOPEAME_VERSION y con el
+#   «Stable tag» de readme.txt; si no coinciden, la acción falla sin publicar nada.
+# - El zip contiene una sola carpeta «shopeame» sin lo que lista .distignore, igual que el que genera
+#   ~/Trabajos/FacturaScripts/scripts/build.sh (sin composer, npm ni traducciones: el plugin no los usa).
+# - Las notas de la release son la entrada de esa versión del «Changelog» de readme.txt.
+# - Cada release lleva dos copias del zip: «shopeame-<versión>.zip» y «shopeame.zip». La segunda tiene siempre el
+#   mismo nombre, así que el enlace https://github.com/<owner>/<repo>/releases/latest/download/shopeame.zip
+#   descarga siempre la última release.
+name: Crear Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PLUGIN_SLUG: shopeame
+
+    steps:
+      - name: Checkout completo del repositorio
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detectar la versión y comprobar que coincide en los tres sitios
+        id: version
+        run: |
+          set -euo pipefail
+          HEADER_VERSION=$(grep -m1 -E '^[[:space:]]*\*[[:space:]]*Version:' shopeame.php | sed -E 's/.*Version:[[:space:]]*//' | tr -d '[:space:]')
+          CONST_VERSION=$(grep -m1 "define( 'SHOPEAME_VERSION'" shopeame.php | sed -E "s/.*'SHOPEAME_VERSION',[[:space:]]*'([^']+)'.*/\1/")
+          STABLE_TAG=$(grep -m1 -E '^Stable tag:' readme.txt | sed -E 's/^Stable tag:[[:space:]]*//' | tr -d '[:space:]')
+
+          echo "Cabecera Version:  ${HEADER_VERSION}"
+          echo "SHOPEAME_VERSION:  ${CONST_VERSION}"
+          echo "Stable tag:        ${STABLE_TAG}"
+
+          if [ -z "$HEADER_VERSION" ] || [ "$HEADER_VERSION" != "$CONST_VERSION" ] || [ "$HEADER_VERSION" != "$STABLE_TAG" ]; then
+            echo "::error::La versión no coincide en la cabecera de shopeame.php, SHOPEAME_VERSION y el Stable tag de readme.txt."
+            exit 1
+          fi
+
+          if gh release view "v${HEADER_VERSION}" > /dev/null 2>&1; then
+            echo "⚠️  La versión ${HEADER_VERSION} ya tiene release publicada. No se hace nada."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=${HEADER_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Generar las notas desde el Changelog de readme.txt
+        if: steps.version.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          # Líneas entre «= <versión> =» y el siguiente encabezado dentro de la sección Changelog; los «*» de
+          # WordPress se pasan a listas de Markdown
+          ENTRY=$(awk -v ver="$VERSION" '
+            /^== Changelog ==/ { in_log = 1; next }
+            in_log && /^== / { exit }
+            in_log && $0 == "= " ver " =" { in_ver = 1; next }
+            in_ver && /^= / { exit }
+            in_ver { print }
+          ' readme.txt | sed -E 's/^\*[[:space:]]*/- /')
+
+          if [ -z "$(echo "$ENTRY" | tr -d '[:space:]')" ]; then
+            echo "::error::readme.txt no tiene entrada en el Changelog para la versión ${VERSION}."
+            exit 1
+          fi
+
+          printf '## Versión %s\n\n%s\n' "$VERSION" "$ENTRY" > "${RUNNER_TEMP}/notes.md"
+          cat "${RUNNER_TEMP}/notes.md"
+
+      - name: Crear el zip del plugin
+        if: steps.version.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          BUILD_DIR="${RUNNER_TEMP}/build"
+          rm -rf "$BUILD_DIR"
+          mkdir -p "${BUILD_DIR}/${PLUGIN_SLUG}"
+
+          # Mismo criterio que build.sh: una sola carpeta con el slug y sin lo que lista .distignore
+          rsync -a --exclude-from=.distignore ./ "${BUILD_DIR}/${PLUGIN_SLUG}/"
+          find "$BUILD_DIR" -type d -print0 | xargs -0 chmod 0755
+          find "$BUILD_DIR" -type f -print0 | xargs -0 chmod 0644
+
+          ZIP_FILE="${RUNNER_TEMP}/${PLUGIN_SLUG}-${VERSION}.zip"
+          (cd "$BUILD_DIR" && zip -qr "$ZIP_FILE" "${PLUGIN_SLUG}")
+          cp "$ZIP_FILE" "${RUNNER_TEMP}/${PLUGIN_SLUG}.zip"
+
+          echo "Contenido del zip:"
+          unzip -l "$ZIP_FILE"
+
+      - name: Crear la release en GitHub
+        if: steps.version.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "v${VERSION}" \
+            --target "$GITHUB_SHA" \
+            --title "Versión ${VERSION}" \
+            --notes-file "${RUNNER_TEMP}/notes.md" \
+            --latest \
+            "${RUNNER_TEMP}/${PLUGIN_SLUG}-${VERSION}.zip" \
+            "${RUNNER_TEMP}/${PLUGIN_SLUG}.zip"
+
+          echo "Release v${VERSION} creada."
+          echo "Enlace a la última versión: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/${PLUGIN_SLUG}.zip"

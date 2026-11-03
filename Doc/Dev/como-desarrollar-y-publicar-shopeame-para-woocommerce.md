@@ -57,6 +57,12 @@ msgfmt -o wp-content/languages/plugins/shopeame-es_ES.mo languages/shopeame-es_E
    (documentación, `README.md`, `AGENTS.md`, `CLAUDE.md`, `languages/` y archivos ocultos).
 6. La primera vez se envía el zip desde la página de añadir plugins de WordPress.org; las versiones siguientes se
    publican por SVN (código en `trunk/`, versión en `tags/<versión>` e imágenes de la ficha en `assets/`).
+7. Con los cambios en `master`, se lanza la acción **Crear Release** de GitHub (pestaña *Actions* o
+   `gh workflow run release.yml`). Falla si la versión no coincide en los tres sitios del paso 1 o si falta su
+   entrada en el `Changelog`, y no hace nada si esa versión ya tiene release. Si todo está bien, crea la etiqueta
+   `v<versión>` con esa entrada del `Changelog` como notas y adjunta el mismo zip del paso 5 con dos nombres:
+   `shopeame-<versión>.zip` y `shopeame.zip`. Este último permite un enlace fijo a la última versión:
+   `https://github.com/FacturaScripts/shopeame-woocommerce/releases/latest/download/shopeame.zip`.
 
 ## Ver también
 

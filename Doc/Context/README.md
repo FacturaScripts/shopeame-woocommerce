@@ -15,7 +15,7 @@ en el mismo trabajo que cambia el código.
 | [1. Arquitectura](01-arquitectura.md) | Archivos del plugin, opciones guardadas, hooks y relación con ShopeameServer |
 | [2. Vinculación con shopea.me](02-vinculacion.md) | Las dos formas de vincular, el endpoint REST firmado con HMAC, desvincular y borrar datos |
 | [3. Pedidos](03-pedidos.md) | Qué se envía al crear o modificar un pedido, qué hace el servidor y dónde quedan los errores |
-| [4. Publicación en WordPress.org](04-publicacion-en-wordpress-org.md) | Directrices que se cumplen, `readme.txt`, Plugin Check, zip y traducciones |
+| [4. Publicación en WordPress.org](04-publicacion-en-wordpress-org.md) | Directrices que se cumplen, `readme.txt`, Plugin Check, zip, release de GitHub y traducciones |
 
 ## Decisiones
 

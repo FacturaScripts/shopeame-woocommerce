@@ -30,6 +30,13 @@
   `README.md`, `languages/` y archivos ocultos). Lo genera `~/Trabajos/FacturaScripts/scripts/build.sh` como
   `zip-plugins/shopeame-woocommerce.zip`; el nombre del archivo no es `shopeame.zip` para no pisar el del plugin
   `Shopeame` de FacturaScripts en un disco que no distingue mayúsculas.
+- La acción de GitHub `.github/workflows/release.yml` (**Crear Release**, se lanza a mano) genera el mismo zip con
+  `.distignore` y lo publica en una release `v<versión>` con dos nombres: `shopeame-<versión>.zip` y
+  `shopeame.zip`. El segundo no cambia de nombre entre versiones para que
+  `.../releases/latest/download/shopeame.zip` sea un enlace fijo a la última. Es la plantilla de release de fsmaker
+  adaptada: la versión sale de `shopeame.php` y debe coincidir con `SHOPEAME_VERSION` y el `Stable tag`, las notas
+  son la entrada del `Changelog` de `readme.txt` y no hay pasos de composer, npm ni traducciones. `.github` está en
+  `.distignore` para no ir en el zip.
 - El envío se hace en https://wordpress.org/plugins/developers/add/. Después de aprobarlo se publica por SVN:
   código en `trunk/`, versión en `tags/<versión>` e imágenes de la ficha (banner, icono y capturas) en `assets/` del
   SVN, no en el zip.

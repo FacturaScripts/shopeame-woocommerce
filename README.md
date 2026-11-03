@@ -82,6 +82,16 @@ msgmerge --update languages/shopeame-es_ES.po languages/shopeame.pot
    zips y scripts `.sh` dentro del plugin).
 3. Pasa *Herramientas > Comprobar plugins* (Plugin Check) sobre el plugin instalado desde ese zip.
 
+## Release en GitHub
+
+Con los cambios de versión ya en `master`, lanza la acción **Crear Release** desde la pestaña *Actions* del
+repositorio (o `gh workflow run release.yml`). Comprueba que la versión coincide en los tres sitios, crea la
+etiqueta `v<versión>` con las notas del `Changelog` de `readme.txt` y adjunta el zip dos veces:
+`shopeame-<versión>.zip` y `shopeame.zip`. Si esa versión ya tiene release, no hace nada.
+
+El enlace https://github.com/FacturaScripts/shopeame-woocommerce/releases/latest/download/shopeame.zip descarga
+siempre la última release (solo funciona sin iniciar sesión si el repositorio es público).
+
 La documentación de uso y de programación está en `Doc/` (ver `AGENTS.md`).
 
 ## Configuración para desarrollo
