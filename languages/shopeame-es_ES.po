@@ -107,6 +107,10 @@ msgstr "La tienda %1$s está vinculada con %2$s. Sus pedidos se sincronizan auto
 msgid "View the store on shopea.me"
 msgstr "Ver la tienda en shopea.me"
 
+#: includes/shopeame_menu.php:224
+msgid "Could not connect to shopea.me to confirm that the store is linked."
+msgstr "No se pudo conectar con shopea.me para confirmar la vinculación de la tienda."
+
 #: includes/shopeame_menu.php:208
 msgid "Actions"
 msgstr "Acciones"

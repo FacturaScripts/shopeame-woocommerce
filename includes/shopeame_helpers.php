@@ -70,15 +70,16 @@ function shopeame_maybe_upgrade() {
  * Envía un evento al controlador WebHooks de ShopeameServer.
  *
  * @param array $payload Datos del evento que se envían como JSON.
+ * @param int   $timeout Segundos máximos de espera de la respuesta.
  * @return array Array con 'ok' (bool), 'code' (int), 'data' (array|null) y, si falla la petición, 'error' (string).
  */
-function shopeame_post_webhook( array $payload ) {
+function shopeame_post_webhook( array $payload, $timeout = 20 ) {
     $response = wp_remote_post(
         shopeame_server_url() . '/WebHooks',
         array(
             'headers' => array( 'Content-Type' => 'application/json; charset=utf-8' ),
             'body'    => wp_json_encode( $payload ),
-            'timeout' => 20,
+            'timeout' => $timeout,
         )
     );
     if ( is_wp_error( $response ) ) {
@@ -149,6 +150,50 @@ function shopeame_send_order_event( $event, $order_id ) {
  */
 function shopeame_is_linked() {
     return get_option( SHOPEAME_OPTION_SHOP_UUID, '' ) !== '' && get_option( SHOPEAME_OPTION_WEBHOOK_TOKEN, '' ) !== '';
+}
+
+/**
+ * Pregunta a shopea.me (evento check_shop) si la tienda sigue vinculada, para pintar la pantalla.
+ *
+ * Las credenciales guardadas no bastan: si la tienda se desvincula desde su ficha en shopea.me,
+ * el plugin no recibe ningún aviso y las conserva. Solo damos por buena la respuesta cuando trae
+ * el campo booleano 'exists' (false si está desvinculada o el token ya no es válido); si
+ * shopea.me no responde o devuelve otra cosa, conservamos lo que dicen las credenciales y
+ * marcamos el fallo para avisar. Las credenciales no se borran: se sustituyen al volver a
+ * vincular. Es el mismo criterio que siguen los conectores de PrestaShop y Shopify.
+ *
+ * @return array Array con 'linked' (bool, si se muestra como vinculada) y 'check_failed' (bool,
+ *               si no se pudo confirmar con shopea.me).
+ */
+function shopeame_check_link_state() {
+    if ( ! shopeame_is_linked() ) {
+        return array(
+            'linked'       => false,
+            'check_failed' => false,
+        );
+    }
+
+    // espera corta: la comprobación se hace cada vez que se abre la pantalla
+    $result = shopeame_post_webhook(
+        array(
+            'event' => 'check_shop',
+            'shop'  => get_option( SHOPEAME_OPTION_SHOP_UUID, '' ),
+            'token' => get_option( SHOPEAME_OPTION_WEBHOOK_TOKEN, '' ),
+        ),
+        10
+    );
+
+    if ( isset( $result['data']['exists'] ) && is_bool( $result['data']['exists'] ) ) {
+        return array(
+            'linked'       => $result['data']['exists'],
+            'check_failed' => false,
+        );
+    }
+
+    return array(
+        'linked'       => true,
+        'check_failed' => true,
+    );
 }
 
 /**

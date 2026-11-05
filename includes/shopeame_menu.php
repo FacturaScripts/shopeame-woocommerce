@@ -104,8 +104,11 @@ class shopeame_menu {
         // los avisos de otros plugins se colocan aquí; el nuestro lleva la clase "inline" para no moverse
         echo '<hr class="wp-header-end">';
 
-        if ( shopeame_is_linked() ) {
-            $this->renderLinkedView();
+        // preguntamos a shopea.me si la tienda sigue vinculada: si se desvincula desde allí, el
+        // plugin no se entera y conserva las credenciales
+        $state = shopeame_check_link_state();
+        if ( $state['linked'] ) {
+            $this->renderLinkedView( $state['check_failed'] );
         } else {
             $this->renderNotLinkedView();
         }
@@ -189,9 +192,10 @@ class shopeame_menu {
     /**
      * Pinta la vista de la tienda ya vinculada con shopea.me.
      *
+     * @param bool $check_failed Si no se pudo confirmar la vinculación con shopea.me al abrir la pantalla.
      * @return void
      */
-    private function renderLinkedView() {
+    private function renderLinkedView( $check_failed = false ) {
         $shop_link_url = shopeame_server_url() . '/shop-link/' . rawurlencode( (string) get_option( SHOPEAME_OPTION_SHOP_UUID, '' ) );
         ?>
         <div class="shopeame-section">
@@ -212,7 +216,16 @@ class shopeame_menu {
             </p>
         </div>
 
-        <?php $this->renderResultBanner(); ?>
+        <?php
+        // sin respuesta de shopea.me mostramos lo guardado, pero avisamos de que no está confirmado
+        if ( $check_failed && $this->result === null ) {
+            printf(
+                '<div class="notice notice-warning inline"><p>%s</p></div>',
+                esc_html__( 'Could not connect to shopea.me to confirm that the store is linked.', 'shopeame' )
+            );
+        }
+        $this->renderResultBanner();
+        ?>
 
         <div class="shopeame-section">
             <h2><?php esc_html_e( 'Actions', 'shopeame' ); ?></h2>

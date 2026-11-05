@@ -14,6 +14,10 @@ de la app** (3).
 Pulsa **Comprobar conexión**. Si shopea.me reconoce la tienda, aparece **La conexión con shopea.me funciona
 correctamente.**; si no, **No se pudo confirmar la conexión con shopea.me.** (consulta la página de errores).
 
+La página también lo comprueba cada vez que la abres: si la tienda se ha desvinculado desde shopea.me, vuelve a
+mostrar las opciones para vincularla. Si shopea.me no responde en ese momento, la tienda sigue apareciendo como
+vinculada con el aviso **No se pudo conectar con shopea.me para confirmar la vinculación de la tienda.**
+
 ## 🔌 Desvincular la tienda
 
 1. Pulsa **Desvincular tienda**.
