@@ -228,6 +228,22 @@ class shopeame_menu {
         ?>
 
         <div class="shopeame-section">
+            <h2><?php esc_html_e( 'Invoices', 'shopeame' ); ?></h2>
+            <p><?php esc_html_e( 'You can download the ERP invoices of each order from WooCommerce > Orders and from the order screen.', 'shopeame' ); ?></p>
+            <form method="post" action="">
+                <?php wp_nonce_field( self::NONCE_ACTION ); ?>
+                <input type="hidden" name="shopeame_action" value="save_settings">
+                <p>
+                    <label>
+                        <input type="checkbox" name="customer_invoices" value="yes" <?php checked( get_option( SHOPEAME_OPTION_CUSTOMER_INVOICES, 'yes' ), 'yes' ); ?>>
+                        <?php esc_html_e( 'Let customers download the invoices of their orders from My account', 'shopeame' ); ?>
+                    </label>
+                </p>
+                <button type="submit" class="button"><?php esc_html_e( 'Save', 'shopeame' ); ?></button>
+            </form>
+        </div>
+
+        <div class="shopeame-section">
             <h2><?php esc_html_e( 'Actions', 'shopeame' ); ?></h2>
             <div class="shopeame-actions">
                 <form method="post" action="">
@@ -354,6 +370,9 @@ class shopeame_menu {
             case 'clear_local':
                 $this->actionClearLocal();
                 break;
+            case 'save_settings':
+                $this->actionSaveSettings( isset( $_POST['customer_invoices'] ) );
+                break;
         }
     }
 
@@ -469,6 +488,18 @@ class shopeame_menu {
         shopeame_clear_link_credentials();
 
         $this->notice( 'success', __( 'The connection data saved in this plugin was deleted without changing shopea.me.', 'shopeame' ) );
+    }
+
+    /**
+     * Guarda los ajustes de la pantalla: si los clientes pueden descargar sus facturas desde Mi cuenta.
+     *
+     * @param bool $customer_invoices Si la casilla de facturas para clientes está marcada.
+     * @return void
+     */
+    private function actionSaveSettings( $customer_invoices ) {
+        update_option( SHOPEAME_OPTION_CUSTOMER_INVOICES, $customer_invoices ? 'yes' : 'no' );
+
+        $this->notice( 'success', __( 'Settings saved.', 'shopeame' ) );
     }
 
     /**

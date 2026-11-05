@@ -20,6 +20,8 @@ shopea.me pueda leer los pedidos y los productos, y avisa cuando hay un pedido n
      WordPress.
 3. A partir de ahí, cada vez que se crea o se modifica un pedido, el plugin avisa a shopea.me con el número del pedido.
    shopea.me lo descarga y lo lleva al ERP.
+4. Cuando facturas el pedido en el ERP, puedes descargar sus facturas en PDF desde el listado de pedidos o desde la
+   ficha del pedido de WooCommerce.
 
 ![Página Shopeame de WordPress con la tienda vinculada](../Assets/como-vincular-la-tienda-copiando-los-datos-en-shopeame/04-tienda-vinculada.png)
 
@@ -28,6 +30,8 @@ shopea.me pueda leer los pedidos y los productos, y avisa cuando hay un pedido n
 - Al vincular: la URL de la tienda y las claves de la API de WooCommerce y, en la opción 2, el UUID y el token del ERP.
 - Con cada pedido nuevo o modificado: solo el número del pedido. El resto de datos (cliente, direcciones, productos y
   totales) los lee shopea.me con las claves de solo lectura.
+- Al ver las facturas de un pedido o descargar una: el número del pedido y, al descargar, el de la factura. shopea.me
+  pide las facturas al ERP en ese momento y el PDF no se guarda en WordPress.
 - Antes de vincular la tienda, el plugin no envía nada.
 
 Si eliminas el plugin desde **Plugins**, se borran sus datos y las claves de la API que creó, y shopea.me deja de tener
@@ -38,3 +42,4 @@ acceso a la tienda.
 - [Cómo instalar el plugin Shopeame](como-instalar-el-plugin-shopeame.md)
 - [Cómo vincular la tienda copiando los datos en shopea.me](como-vincular-la-tienda-copiando-los-datos-en-shopeame.md)
 - [Cómo vincular la tienda con el UUID y el token del ERP](como-vincular-la-tienda-con-el-uuid-y-el-token-del-erp.md)
+- [Cómo descargar las facturas de un pedido](como-descargar-las-facturas-de-un-pedido.md)

@@ -17,6 +17,7 @@ $shopeame_options = array(
     'shopeame_webhook_token',
     'shopeame_api_user',
     'shopeame_api_key',
+    'shopeame_customer_invoices',
     'shopeame_db_version',
 );
 foreach ( $shopeame_options as $shopeame_option ) {

@@ -59,6 +59,18 @@
             "keywords": "comprobar conexión, desvincular tienda, borrar datos de la app, regenerar claves api, shopeame, woocommerce",
             "visibility": true
         },
+        "como-descargar-las-facturas-de-un-pedido.md": {
+            "title": "Cómo descargar las facturas de un pedido en WooCommerce",
+            "title_short": "Descargar las facturas de un pedido",
+            "permalink": "como-descargar-las-facturas-de-un-pedido-en-woocommerce",
+            "parent": "como-funciona-shopeame-para-woocommerce.md",
+            "ordernum": 55,
+            "imageurl": "Doc/Assets/como-descargar-las-facturas-de-un-pedido/01-columna-facturas.png",
+            "icon": "fa-solid fa-file-invoice",
+            "color": "success",
+            "keywords": "facturas, descargar factura, pdf, rectificativa, factura parcial, pedido, mi cuenta, cliente, woocommerce, shopeame, erp",
+            "visibility": true
+        },
         "como-resolver-los-errores-de-shopeame-en-woocommerce.md": {
             "title": "Cómo resolver los errores de Shopeame en WooCommerce",
             "title_short": "Errores de Shopeame en WooCommerce",
@@ -89,7 +101,7 @@
             "ordernum": 20,
             "icon": "fa-solid fa-paper-plane",
             "color": "dark",
-            "keywords": "webhooks, eventos, register_woocommerce, new_order, update_order, check_shop, unlink_shop, opciones, shopeame_server_url",
+            "keywords": "webhooks, eventos, register_woocommerce, new_order, update_order, check_shop, unlink_shop, order_invoices, invoice_pdf, facturas, opciones, shopeame_server_url",
             "visibility": true
         },
         "como-desarrollar-y-publicar-shopeame-para-woocommerce.md": {

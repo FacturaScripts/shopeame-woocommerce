@@ -2,7 +2,7 @@
 /**
  * Plugin Name:          Shopeame
  * Plugin URI:           https://shopea.me/woocommerce
- * Description:          Connects your WooCommerce store with shopea.me to sync orders with your FacturaScripts ERP.
+ * Description:          Connects your WooCommerce store with shopea.me to sync orders with your FacturaScripts ERP and download their invoices.
  * Version:              1.0.0
  * Requires at least:    6.5
  * Requires PHP:         7.4
@@ -36,6 +36,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_link_endpoint.php'
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_menu.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_nuevo_pedido.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_modificar_pedido.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_facturas.php';
 
 add_action( 'plugins_loaded', 'shopeame_maybe_upgrade' );
 add_action( 'before_woocommerce_init', 'shopeame_declare_wc_compatibility' );
@@ -43,6 +44,7 @@ add_action( 'admin_menu', 'shopeame_add_menu' );
 add_action( 'admin_enqueue_scripts', 'shopeame_enqueue_admin_assets' );
 add_action( 'woocommerce_new_order', 'shopeame_crear_pedido', 10, 1 );
 add_action( 'woocommerce_update_order', 'shopeame_modificar_pedido', 10, 1 );
+shopeame_facturas::register();
 
 /**
  * Declara la compatibilidad del plugin con las funcionalidades de WooCommerce.
