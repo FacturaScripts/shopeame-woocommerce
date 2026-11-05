@@ -40,6 +40,18 @@ Aviso: **No se pudo confirmar la conexión con shopea.me.**
 ⚠️ Si regeneras las claves de la API o las revocas en **WooCommerce** → **Ajustes** → **Avanzado** → **API REST**,
 shopea.me deja de poder leer los pedidos hasta que vuelvas a vincular la tienda.
 
+## 🧾 No aparecen las facturas de un pedido
+
+- **Este pedido aún no tiene facturas en el ERP.**: el pedido no está facturado o no llegó al ERP. Revisa en el ERP que
+  el pedido de la tienda está facturado.
+- **Tu ERP no está disponible ahora mismo. Inténtalo más tarde.**: el ERP está apagado o sin el plugin Shopeame.
+- **Tu ERP no permite descargar facturas. Actualiza FacturaScripts y el plugin Shopeame.**: actualiza el ERP.
+- **shopea.me todavía no permite descargar facturas.**: shopea.me aún no tiene esta función.
+
+Cada fallo se anota en el registro de WooCommerce con la fuente `shopeame`, como los avisos de pedidos (eventos
+`order_invoices` e `invoice_pdf`). Más detalles en
+[Cómo descargar las facturas de un pedido](como-descargar-las-facturas-de-un-pedido.md).
+
 ## Ver también
 
 - [Cómo comprobar, desvincular o borrar los datos de la tienda](como-comprobar-desvincular-o-borrar-los-datos-de-la-tienda.md)

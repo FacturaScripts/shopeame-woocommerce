@@ -4,7 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Shopeame 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/shopeame\n"
-"PO-Revision-Date: 2026-11-02 17:49+0100\n"
+"POT-Creation-Date: 2026-11-05 16:59+0100\n"
+"PO-Revision-Date: 2026-11-05 17:00+0100\n"
 "Last-Translator: Shopeame\n"
 "Language-Team: Spanish (Spain)\n"
 "Language: es_ES\n"
@@ -13,6 +14,110 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: shopeame\n"
+
+#: includes/shopeame_facturas.php:107 includes/shopeame_facturas.php:113
+#: includes/shopeame_facturas.php:151 includes/shopeame_facturas.php:223
+#: includes/shopeame_facturas.php:243 includes/shopeame_facturas.php:486
+#: includes/shopeame_menu.php:231
+msgid "Invoices"
+msgstr "Facturas"
+
+#. translators: %s: order number.
+#: includes/shopeame_facturas.php:225
+#, php-format
+msgid "Invoices of order %s"
+msgstr "Facturas del pedido %s"
+
+#: includes/shopeame_facturas.php:291
+msgid "Loading invoices…"
+msgstr "Cargando facturas…"
+
+#: includes/shopeame_facturas.php:293
+msgid "This order has no invoices yet."
+msgstr "Este pedido aún no tiene facturas."
+
+#: includes/shopeame_facturas.php:294
+msgid "This order has no invoices in the ERP yet."
+msgstr "Este pedido aún no tiene facturas en el ERP."
+
+#: includes/shopeame_facturas.php:295
+msgid "The invoices could not be loaded."
+msgstr "No se han podido cargar las facturas."
+
+#: includes/shopeame_facturas.php:296
+msgid "Corrective"
+msgstr "Rectificativa"
+
+#. translators: %s: code of the invoice that the corrective invoice rectifies.
+#: includes/shopeame_facturas.php:298
+#, php-format
+msgid "Corrective invoice of %s"
+msgstr "Factura rectificativa de %s"
+
+#: includes/shopeame_facturas.php:299
+msgid "Download PDF"
+msgstr "Descargar PDF"
+
+#: includes/shopeame_facturas.php:300
+msgid "Reload"
+msgstr "Volver a cargar"
+
+#: includes/shopeame_facturas.php:314 includes/shopeame_facturas.php:335
+#: includes/shopeame_facturas.php:340
+msgid "You are not allowed to view the invoices."
+msgstr "No tienes permiso para ver las facturas."
+
+#: includes/shopeame_facturas.php:319 includes/shopeame_facturas.php:407
+msgid "The order does not exist."
+msgstr "El pedido no existe."
+
+#: includes/shopeame_facturas.php:356 includes/shopeame_facturas.php:418
+#: includes/shopeame_facturas.php:537
+msgid "The store is not linked with shopea.me."
+msgstr "La tienda no está vinculada con shopea.me."
+
+#: includes/shopeame_facturas.php:414
+msgid "You are not allowed to download the invoices."
+msgstr "No tienes permiso para descargar las facturas."
+
+#: includes/shopeame_facturas.php:446
+msgid "Invoice download"
+msgstr "Descarga de factura"
+
+#: includes/shopeame_facturas.php:525
+msgid "The invoices are not available right now. Try again later."
+msgstr "Las facturas no están disponibles ahora mismo. Inténtalo más tarde."
+
+#: includes/shopeame_facturas.php:527
+msgid "Could not connect with shopea.me. Try again in a few minutes."
+msgstr ""
+"No se ha podido conectar con shopea.me. Inténtalo de nuevo en unos minutos."
+
+#: includes/shopeame_facturas.php:529
+msgid "shopea.me does not support invoice downloads yet."
+msgstr "shopea.me todavía no permite descargar facturas."
+
+#: includes/shopeame_facturas.php:531
+msgid "Your ERP is not available right now. Try again later."
+msgstr "Tu ERP no está disponible ahora mismo. Inténtalo más tarde."
+
+#: includes/shopeame_facturas.php:533
+msgid ""
+"Your ERP does not allow downloading invoices. Update FacturaScripts and the "
+"Shopeame plugin."
+msgstr ""
+"Tu ERP no permite descargar facturas. Actualiza FacturaScripts y el plugin "
+"Shopeame."
+
+#: includes/shopeame_facturas.php:535
+msgid "The invoice no longer belongs to this order. Reload the invoices."
+msgstr ""
+"La factura ya no pertenece a este pedido. Vuelve a cargar las facturas."
+
+#: includes/shopeame_facturas.php:540
+msgid "The invoices could not be loaded. Try again in a few minutes."
+msgstr ""
+"No se han podido cargar las facturas. Inténtalo de nuevo en unos minutos."
 
 #: includes/shopeame_link_endpoint.php:51
 #: includes/shopeame_link_endpoint.php:56
@@ -27,175 +132,236 @@ msgstr "JSON no válido."
 msgid "Invalid link data."
 msgstr "Datos de vinculación no válidos."
 
-#: includes/shopeame_menu.php:93
+#: includes/shopeame_menu.php:103
 msgid "Connect with shopea.me"
 msgstr "Conectar con shopea.me"
 
-#: includes/shopeame_menu.php:117
+#: includes/shopeame_menu.php:130
 msgid "Your store is ready to connect 🎉"
 msgstr "Tu tienda ya está lista para conectar 🎉"
 
 #. translators: %s: link to shopea.me
-#: includes/shopeame_menu.php:123
+#: includes/shopeame_menu.php:136
 #, php-format
-msgid "This plugin connects your WooCommerce store with %s. To connect the store you first need to register your ERP on shopea.me. Once registered, there are two ways to link this store."
-msgstr "Este plugin actúa de conector entre tu tienda de WooCommerce y %s. Para conectar la tienda online con shopea.me necesitas tener previamente registrado tu ERP en shopea.me. Una vez registrado, tienes dos formas de vincular esta tienda."
+msgid ""
+"This plugin connects your WooCommerce store with %s. To connect the store "
+"you first need to register your ERP on shopea.me. Once registered, there are "
+"two ways to link this store."
+msgstr ""
+"Este plugin actúa de conector entre tu tienda de WooCommerce y %s. Para "
+"conectar la tienda online con shopea.me necesitas tener previamente "
+"registrado tu ERP en shopea.me. Una vez registrado, tienes dos formas de "
+"vincular esta tienda."
 
-#: includes/shopeame_menu.php:134
+#: includes/shopeame_menu.php:147
 msgid "Option 1: copy the data into shopea.me"
 msgstr "Opción 1: copiar los datos en shopea.me"
 
-#: includes/shopeame_menu.php:135
-msgid "Copy the data below and paste it into shopea.me when connecting a WooCommerce store."
-msgstr "Copia los datos de abajo y pégalos en shopea.me al conectar una tienda de tipo WooCommerce."
+#: includes/shopeame_menu.php:148
+msgid ""
+"Copy the data below and paste it into shopea.me when connecting a "
+"WooCommerce store."
+msgstr ""
+"Copia los datos de abajo y pégalos en shopea.me al conectar una tienda de "
+"tipo WooCommerce."
 
-#: includes/shopeame_menu.php:138
+#: includes/shopeame_menu.php:151
 msgid "Store URL"
 msgstr "URL de la tienda"
 
-#: includes/shopeame_menu.php:139
+#: includes/shopeame_menu.php:152
 msgid "Consumer key"
 msgstr "Clave del cliente (Consumer key)"
 
-#: includes/shopeame_menu.php:142
+#: includes/shopeame_menu.php:155
 msgid "Consumer secret"
 msgstr "Clave secreta (Consumer secret)"
 
-#: includes/shopeame_menu.php:144
-msgid "Treat these keys like a password: anyone who has them can read the orders and products of your store through the WooCommerce API."
-msgstr "Trata estas claves como una contraseña: cualquiera con ellas puede leer los pedidos y productos de tu tienda a través de la API de WooCommerce."
+#: includes/shopeame_menu.php:157
+msgid ""
+"Treat these keys like a password: anyone who has them can read the orders "
+"and products of your store through the WooCommerce API."
+msgstr ""
+"Trata estas claves como una contraseña: cualquiera con ellas puede leer los "
+"pedidos y productos de tu tienda a través de la API de WooCommerce."
 
-#: includes/shopeame_menu.php:152
-msgid "Generate API keys"
-msgstr "Generar claves API"
-
-#: includes/shopeame_menu.php:152
+#: includes/shopeame_menu.php:165
 msgid "Regenerate API keys"
 msgstr "Regenerar claves API"
 
-#: includes/shopeame_menu.php:158
+#: includes/shopeame_menu.php:165
+msgid "Generate API keys"
+msgstr "Generar claves API"
+
+#: includes/shopeame_menu.php:171
 msgid "Option 2: link using your ERP details"
 msgstr "Opción 2: vincular indicando tu ERP"
 
-#: includes/shopeame_menu.php:159
-msgid "Enter the UUID and token of your ERP (you get them on shopea.me once the ERP is registered) and this store will be linked automatically."
-msgstr "Introduce el UUID y el token de tu ERP (los obtienes en shopea.me una vez registrado el ERP) y vincularemos esta tienda automáticamente."
+#: includes/shopeame_menu.php:172
+msgid ""
+"Enter the UUID and token of your ERP (you get them on shopea.me once the ERP "
+"is registered) and this store will be linked automatically."
+msgstr ""
+"Introduce el UUID y el token de tu ERP (los obtienes en shopea.me una vez "
+"registrado el ERP) y vincularemos esta tienda automáticamente."
 
-#: includes/shopeame_menu.php:165
+#: includes/shopeame_menu.php:178
 msgid "ERP UUID"
 msgstr "UUID del ERP"
 
-#: includes/shopeame_menu.php:169
+#: includes/shopeame_menu.php:182
 msgid "ERP token"
 msgstr "Token del ERP"
 
-#: includes/shopeame_menu.php:173
+#: includes/shopeame_menu.php:186
 msgid "Link store"
 msgstr "Vincular tienda"
 
-#: includes/shopeame_menu.php:188
+#: includes/shopeame_menu.php:202
 msgid "Store linked ✅"
 msgstr "Tienda vinculada ✅"
 
 #. translators: 1: store URL, 2: link to shopea.me
-#: includes/shopeame_menu.php:194
+#: includes/shopeame_menu.php:208
 #, php-format
-msgid "The store %1$s is linked with %2$s. Its orders are synced automatically."
-msgstr "La tienda %1$s está vinculada con %2$s. Sus pedidos se sincronizan automáticamente."
+msgid ""
+"The store %1$s is linked with %2$s. Its orders are synced automatically."
+msgstr ""
+"La tienda %1$s está vinculada con %2$s. Sus pedidos se sincronizan "
+"automáticamente."
 
-#: includes/shopeame_menu.php:200
+#: includes/shopeame_menu.php:214
 msgid "View the store on shopea.me"
 msgstr "Ver la tienda en shopea.me"
 
 #: includes/shopeame_menu.php:224
 msgid "Could not connect to shopea.me to confirm that the store is linked."
-msgstr "No se pudo conectar con shopea.me para confirmar la vinculación de la tienda."
+msgstr ""
+"No se pudo conectar con shopea.me para confirmar la vinculación de la tienda."
 
-#: includes/shopeame_menu.php:208
+#: includes/shopeame_menu.php:232
+msgid ""
+"You can download the ERP invoices of each order from WooCommerce > Orders "
+"and from the order screen."
+msgstr "Puedes descargar las facturas del ERP de cada pedido desde WooCommerce > Pedidos y desde la ficha del pedido."
+
+#: includes/shopeame_menu.php:239
+msgid "Let customers download the invoices of their orders from My account"
+msgstr "Permitir que los clientes descarguen las facturas de sus pedidos desde Mi cuenta"
+
+#: includes/shopeame_menu.php:242
+msgid "Save"
+msgstr "Guardar"
+
+#: includes/shopeame_menu.php:247
 msgid "Actions"
 msgstr "Acciones"
 
-#: includes/shopeame_menu.php:213
+#: includes/shopeame_menu.php:252
 msgid "Check connection"
 msgstr "Comprobar conexión"
 
-#: includes/shopeame_menu.php:216
+#: includes/shopeame_menu.php:255
 msgid "This will unlink the store from Shopeame. Do you want to continue?"
 msgstr "Esta acción desvinculará la tienda de Shopeame. ¿Quieres continuar?"
 
-#: includes/shopeame_menu.php:219
+#: includes/shopeame_menu.php:258
 msgid "Unlink store"
 msgstr "Desvincular tienda"
 
-#: includes/shopeame_menu.php:222
-msgid "This will only delete the connection data saved in this plugin and will not change Shopeame. Do you want to continue?"
-msgstr "Esta acción solo borrará los datos de conexión guardados en la app y no modificará Shopeame. ¿Quieres continuar?"
+#: includes/shopeame_menu.php:261
+msgid ""
+"This will only delete the connection data saved in this plugin and will not "
+"change Shopeame. Do you want to continue?"
+msgstr ""
+"Esta acción solo borrará los datos de conexión guardados en la app y no "
+"modificará Shopeame. ¿Quieres continuar?"
 
-#: includes/shopeame_menu.php:225
+#: includes/shopeame_menu.php:264
 msgid "Delete plugin data"
 msgstr "Borrar datos de la app"
 
-#: includes/shopeame_menu.php:251
+#: includes/shopeame_menu.php:290
 msgid "Copied"
 msgstr "Copiado"
 
-#: includes/shopeame_menu.php:251
+#: includes/shopeame_menu.php:290
 msgid "Copy"
 msgstr "Copiar"
 
-#: includes/shopeame_menu.php:253
+#: includes/shopeame_menu.php:292
 msgid "Click “Generate API keys” to create it"
 msgstr "Pulsa «Generar claves API» para crearla"
 
-#: includes/shopeame_menu.php:344
+#: includes/shopeame_menu.php:386
 msgid "API keys generated successfully."
 msgstr "Claves API generadas correctamente."
 
-#: includes/shopeame_menu.php:346 includes/shopeame_menu.php:366
+#: includes/shopeame_menu.php:388 includes/shopeame_menu.php:408
 msgid "The API keys could not be generated. Is WooCommerce active?"
 msgstr "No se pudieron generar las claves API. ¿Está activo WooCommerce?"
 
-#: includes/shopeame_menu.php:359
+#: includes/shopeame_menu.php:401
 msgid "Enter the ERP UUID and token."
 msgstr "Introduce el UUID y el token del ERP."
 
-#: includes/shopeame_menu.php:388
-msgid "The store could not be linked. Check that the ERP UUID and token are correct."
-msgstr "No se pudo vincular la tienda. Revisa que el UUID y el token del ERP sean correctos."
+#: includes/shopeame_menu.php:430
+msgid ""
+"The store could not be linked. Check that the ERP UUID and token are correct."
+msgstr ""
+"No se pudo vincular la tienda. Revisa que el UUID y el token del ERP sean "
+"correctos."
 
-#: includes/shopeame_menu.php:407
+#: includes/shopeame_menu.php:449
 msgid "The connection with shopea.me is working correctly."
 msgstr "La conexión con shopea.me funciona correctamente."
 
-#: includes/shopeame_menu.php:409
+#: includes/shopeame_menu.php:451
 msgid "The connection with shopea.me could not be confirmed."
 msgstr "No se pudo confirmar la conexión con shopea.me."
 
-#: includes/shopeame_menu.php:432
+#: includes/shopeame_menu.php:474
 msgid "Store unlinked from shopea.me."
 msgstr "Tienda desvinculada de shopea.me."
 
-#: includes/shopeame_menu.php:434
-msgid "The local credentials were deleted, but shopea.me did not confirm the unlinking."
-msgstr "Se borraron las credenciales locales, pero shopea.me no confirmó la desvinculación."
-
-#: includes/shopeame_menu.php:448
-msgid "The connection data saved in this plugin was deleted without changing shopea.me."
-msgstr "Se borraron los datos de conexión de la app sin modificar ShopeameServer."
-
-#: includes/shopeame_menu.php:473
-msgid "The store was already linked. Its data was recovered without creating a new store."
-msgstr "La tienda ya estaba vinculada. Se recuperaron sus datos sin crear una tienda nueva."
-
 #: includes/shopeame_menu.php:476
+msgid ""
+"The local credentials were deleted, but shopea.me did not confirm the "
+"unlinking."
+msgstr ""
+"Se borraron las credenciales locales, pero shopea.me no confirmó la "
+"desvinculación."
+
+#: includes/shopeame_menu.php:490
+msgid ""
+"The connection data saved in this plugin was deleted without changing shopea."
+"me."
+msgstr ""
+"Se borraron los datos de conexión de la app sin modificar ShopeameServer."
+
+#: includes/shopeame_menu.php:502
+msgid "Settings saved."
+msgstr "Ajustes guardados."
+
+#: includes/shopeame_menu.php:527
+msgid ""
+"The store was already linked. Its data was recovered without creating a new "
+"store."
+msgstr ""
+"La tienda ya estaba vinculada. Se recuperaron sus datos sin crear una tienda "
+"nueva."
+
+#: includes/shopeame_menu.php:530
 msgid "The store was reactivated and linked with shopea.me successfully."
 msgstr "La tienda se reactivó y quedó vinculada con shopea.me correctamente."
 
-#: includes/shopeame_menu.php:478
+#: includes/shopeame_menu.php:532
 msgid "Store linked with shopea.me successfully."
 msgstr "Tienda vinculada con shopea.me correctamente."
 
-#. Description of the plugin
-#: shopeame.php
-msgid "Connects your WooCommerce store with shopea.me to sync orders with your FacturaScripts ERP."
-msgstr "Conecta tu tienda WooCommerce con shopea.me para sincronizar los pedidos con tu ERP FacturaScripts."
+#~ msgid ""
+#~ "Connects your WooCommerce store with shopea.me to sync orders with your "
+#~ "FacturaScripts ERP."
+#~ msgstr ""
+#~ "Conecta tu tienda WooCommerce con shopea.me para sincronizar los pedidos "
+#~ "con tu ERP FacturaScripts."

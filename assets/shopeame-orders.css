@@ -1,0 +1,95 @@
+/**
+ * Estilos de las facturas del ERP en el listado y en la ficha de los pedidos de WooCommerce.
+ *
+ * En los listados (administrador y Mi cuenta) el panel es un desplegable sobre la tabla; en la ficha
+ * del pedido y al ver un pedido en Mi cuenta, una lista dentro de su cuadro o sección «Invoices».
+ * En Mi cuenta se respetan la tipografía y los colores del tema.
+ */
+
+/* Columna del listado: estrecha, el desplegable se posiciona respecto a la celda */
+.column-shopeame_invoices {
+    width: 9ch;
+}
+
+.shopeame-invoices {
+    position: relative;
+}
+
+/* Desplegable del listado */
+.shopeame-invoices:not(.shopeame-invoices--box) .shopeame-invoices__panel {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 260px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    text-align: left;
+}
+
+.shopeame-invoices__panel[hidden] {
+    display: none;
+}
+
+.shopeame-invoices__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Sección «Invoices» al ver un pedido en Mi cuenta */
+.woocommerce-shopeame-invoices {
+    margin: 2em 0;
+}
+
+.shopeame-invoices__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 0;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.shopeame-invoices__item:last-child {
+    border-bottom: 0;
+}
+
+.shopeame-invoices__link {
+    font-weight: 600;
+}
+
+/* Las rectificativas se distinguen con una etiqueta y el total en rojo */
+.shopeame-invoices__badge {
+    padding: 0 6px;
+    border-radius: 3px;
+    background: #fcf0f1;
+    color: #8a2424;
+    font-size: 11px;
+    line-height: 18px;
+}
+
+.shopeame-invoices__meta {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    color: #50575e;
+    white-space: nowrap;
+}
+
+.shopeame-invoices__item--refund .shopeame-invoices__total {
+    color: #b32d2e;
+}
+
+.shopeame-invoices__message {
+    margin: 4px 0;
+    color: #50575e;
+}
+
+.shopeame-invoices__message--error {
+    color: #b32d2e;
+}

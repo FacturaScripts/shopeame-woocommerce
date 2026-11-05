@@ -21,6 +21,9 @@ const SHOPEAME_OPTION_API_USER = 'shopeame_api_user';
 /** Opción con la clave secreta (consumer secret) de la API REST de WooCommerce. */
 const SHOPEAME_OPTION_API_KEY = 'shopeame_api_key';
 
+/** Opción que indica si los clientes pueden descargar sus facturas desde Mi cuenta: «yes» (por defecto) o «no». */
+const SHOPEAME_OPTION_CUSTOMER_INVOICES = 'shopeame_customer_invoices';
+
 /** Opción con la versión del plugin con la que se migraron por última vez los datos guardados. */
 const SHOPEAME_OPTION_DB_VERSION = 'shopeame_db_version';
 
