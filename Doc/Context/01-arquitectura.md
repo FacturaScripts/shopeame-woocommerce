@@ -9,11 +9,12 @@
 | `includes/shopeame_link_endpoint.php` | Endpoint REST `POST /wp-json/shopeame/v1/link`, firmado con HMAC |
 | `includes/shopeame_menu.php` | Clase `shopeame_menu`: menú **Shopeame**, pantalla de vinculación y sus acciones |
 | `includes/shopeame_nuevo_pedido.php`, `includes/shopeame_modificar_pedido.php` | Avisos de pedido nuevo y modificado |
+| `includes/shopeame_updater.php` | Actualizaciones desde GitHub: constantes `SHOPEAME_UPDATE_URI` y `SHOPEAME_PLUGIN_SLUG`, lectura del `info.json` de la última release y filtros `update_plugins_github.com` y `plugins_api` (ver [4. Distribución y actualizaciones](04-distribucion-y-actualizaciones.md)) |
 | `uninstall.php` | Borra opciones y claves de la API al eliminar el plugin |
 | `assets/shopeame-admin.css`, `assets/shopeame-admin.js` | Estilos de la pantalla y botones «Copiar» y confirmaciones |
 | `assets/shopeame-menu-icon.svg` | Logo de Shopeame (la «S» con líneas de velocidad) para el menú lateral. `shopeame_menu::MENU_ICON` guarda este SVG ya codificado en base64 como `data:image/svg+xml;base64,…`, monocromo para que WordPress lo recoloree con el esquema del administrador; se codifica de antemano porque Plugin Check avisa de `base64_encode()` y de `file_get_contents()`. Si se cambia el SVG, hay que regenerar la constante |
-| `readme.txt` | Ficha del directorio de WordPress.org (en inglés) |
-| `languages/` | Plantilla y traducción al español para translate.wordpress.org; no va en el zip |
+| `readme.txt` | Descripción en el formato estándar de WordPress (en inglés): requisitos, **External services** y `Changelog`, del que salen las notas de la release y el `info.json` |
+| `languages/` | Plantilla, traducción al español y su `.mo`, que el plugin carga (ver [decisión 0004](Decisiones/0004-traducciones-incluidas-en-el-plugin.md)) |
 
 La pantalla imita la estructura y los textos de la app de Shopify de Shopeame, que es la base visual común de los
 conectores de Shopify, WooCommerce y PrestaShop.
@@ -34,8 +35,10 @@ La tienda está vinculada cuando hay `shopeame_shop_uuid` y `shopeame_webhook_to
 | Hook | Función |
 |---|---|
 | `plugins_loaded` | `shopeame_maybe_upgrade` |
+| `init` | `shopeame_load_textdomain` (traducciones de `languages/`) |
+| `update_plugins_github.com`, `plugins_api` | `shopeame_filter_update_plugins` y `shopeame_filter_plugins_api` (versión nueva y ventana «Ver detalles») |
 | `before_woocommerce_init` | `shopeame_declare_wc_compatibility` (HPOS y bloques de carrito y pago) |
-| `admin_menu`, `admin_enqueue_scripts` | Menú y recursos de la pantalla (solo en `toplevel_page_shopeame`) |
+| `admin_menu`, `admin_enqueue_scripts` | Menú y recursos de la pantalla (solo en `toplevel_page_shopeame`); la pantalla pinta además el aviso de versión nueva y la versión instalada |
 | `rest_api_init` | Registro del endpoint de vinculación |
 | `woocommerce_new_order`, `woocommerce_update_order` | Avisos de pedido a shopea.me |
 

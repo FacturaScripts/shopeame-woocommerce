@@ -1,6 +1,7 @@
 Plugin **Shopeame** para WordPress y WooCommerce: conecta una tienda WooCommerce con el servicio shopea.me, que hace de
-intermediario entre las tiendas online y el ERP FacturaScripts del cliente. Se publica en el directorio de plugins de
-WordPress.org con el slug `shopeame`.
+intermediario entre las tiendas online y el ERP FacturaScripts del cliente. No está en el directorio de WordPress.org:
+se descarga de las releases del repositorio público de GitHub (slug y carpeta `shopeame`) y WordPress ofrece sus
+versiones nuevas en **Plugins** gracias a la cabecera `Update URI`.
 
 Antes de tocar nada lee [`Doc/Context/README.md`](Doc/Context/README.md): es el índice del contexto (temas y
 decisiones) y dice qué archivo abrir para cada tema; no hace falta leerlo todo. Las reglas de trabajo están en
@@ -12,8 +13,11 @@ Lo que no se salta nunca:
   los datos enviados o la firma se hace a la vez en los dos lados.
 - Antes de hacer o explicar algo, contrasta la forma correcta en la documentación oficial de WordPress
   (https://developer.wordpress.org) y de WooCommerce (https://developer.woocommerce.com/docs/).
-- El plugin cumple las directrices de WordPress.org y pasa Plugin Check sin errores ni advertencias
-  (ver [`Doc/Context/04-publicacion-en-wordpress-org.md`](Doc/Context/04-publicacion-en-wordpress-org.md)).
+- El plugin mantiene las buenas prácticas de las directrices de WordPress.org y pasa Plugin Check sin más errores ni
+  advertencias que los dos propios del directorio (`Update URI` y `load_plugin_textdomain()`); ver
+  [`Doc/Context/04-distribucion-y-actualizaciones.md`](Doc/Context/04-distribucion-y-actualizaciones.md).
+- Cada release de GitHub lleva el `info.json` del que depende el aviso de actualizaciones: la versión se publica
+  siempre con la acción **Crear Release**.
 
 ## Documentación
 

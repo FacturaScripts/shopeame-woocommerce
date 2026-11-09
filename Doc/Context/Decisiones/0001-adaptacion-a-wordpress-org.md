@@ -2,6 +2,8 @@
 
 - **Fecha**: 02/11/2026
 - **Aprobada por**: el usuario, al pedir revisar el plugin para publicarlo en el directorio de WordPress.org.
+- **Estado**: el plugin ya no se publica en el directorio ([decisión 0003](0003-distribucion-desde-github-con-actualizaciones.md)),
+  pero todo lo de esta decisión se mantiene como buena práctica.
 
 ## Contexto
 

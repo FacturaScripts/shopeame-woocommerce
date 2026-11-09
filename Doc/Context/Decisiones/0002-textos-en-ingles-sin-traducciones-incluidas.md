@@ -3,6 +3,8 @@
 - **Fecha**: 02/11/2026
 - **Aprobada por**: el usuario («Quitarla», al elegir entre mantener la traducción incluida o dejar Plugin Check sin
   advertencias).
+- **Estado**: sustituida por la [decisión 0004](0004-traducciones-incluidas-en-el-plugin.md) al dejar de publicar en
+  WordPress.org.
 
 ## Contexto
 
