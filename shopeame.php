@@ -7,6 +7,7 @@
  * Requires at least:    6.5
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
+ * Update URI:           https://github.com/FacturaScripts/shopeame-woocommerce
  * Author:               Shopeame
  * Author URI:           https://shopea.me
  * License:              GPLv3 or later
@@ -36,8 +37,12 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_link_endpoint.php'
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_menu.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_nuevo_pedido.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_modificar_pedido.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_updater.php';
 
 add_action( 'plugins_loaded', 'shopeame_maybe_upgrade' );
+// actualizaciones desde las releases de GitHub: el filtro lleva el host de la cabecera «Update URI» (github.com)
+add_filter( 'update_plugins_' . wp_parse_url( SHOPEAME_UPDATE_URI, PHP_URL_HOST ), 'shopeame_filter_update_plugins', 10, 3 );
+add_filter( 'plugins_api', 'shopeame_filter_plugins_api', 10, 3 );
 add_action( 'before_woocommerce_init', 'shopeame_declare_wc_compatibility' );
 add_action( 'admin_menu', 'shopeame_add_menu' );
 add_action( 'admin_enqueue_scripts', 'shopeame_enqueue_admin_assets' );

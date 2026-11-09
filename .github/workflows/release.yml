@@ -9,6 +9,8 @@
 # - Cada release lleva dos copias del zip: «shopeame-<versión>.zip» y «shopeame.zip». La segunda tiene siempre el
 #   mismo nombre, así que el enlace https://github.com/<owner>/<repo>/releases/latest/download/shopeame.zip
 #   descarga siempre la última release.
+# - Cada release lleva también «info.json» (versión, zip de esa etiqueta, requisitos y changelog). El plugin lo lee
+#   desde .../releases/latest/download/info.json para que WordPress muestre la actualización en Plugins.
 name: Crear Release
 
 on:
@@ -101,6 +103,50 @@ jobs:
           echo "Contenido del zip:"
           unzip -l "$ZIP_FILE"
 
+      - name: Generar info.json para el aviso de actualizaciones
+        if: steps.version.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          # El plugin lee https://github.com/<owner>/<repo>/releases/latest/download/info.json (includes/shopeame_updater.php)
+          # para avisar a WordPress de la versión nueva. download_url apunta al zip de esta etiqueta, no al de «latest»,
+          # para que el paquete coincida siempre con la versión anunciada.
+          readme_field() {
+            grep -m1 -E "^$1:" readme.txt | sed -E "s/^$1:[[:space:]]*//" | tr -d '\r' | sed -E 's/[[:space:]]+$//'
+          }
+          REQUIRES=$(readme_field 'Requires at least')
+          TESTED=$(readme_field 'Tested up to')
+          REQUIRES_PHP=$(readme_field 'Requires PHP')
+          BASE_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+
+          # Mismas líneas del Changelog que las notas de la release, sin el «* » inicial
+          awk -v ver="$VERSION" '
+            /^== Changelog ==/ { in_log = 1; next }
+            in_log && /^== / { exit }
+            in_log && $0 == "= " ver " =" { in_ver = 1; next }
+            in_ver && /^= / { exit }
+            in_ver && /^\*/ { sub(/^\*[[:space:]]*/, ""); print }
+          ' readme.txt > "${RUNNER_TEMP}/changelog.txt"
+
+          jq -n \
+            --arg name "Shopeame" \
+            --arg slug "$PLUGIN_SLUG" \
+            --arg version "$VERSION" \
+            --arg download_url "${BASE_URL}/releases/download/v${VERSION}/${PLUGIN_SLUG}.zip" \
+            --arg details_url "${BASE_URL}/releases/tag/v${VERSION}" \
+            --arg homepage "$BASE_URL" \
+            --arg released "$(date -u +%Y-%m-%d)" \
+            --arg requires "$REQUIRES" \
+            --arg tested "$TESTED" \
+            --arg requires_php "$REQUIRES_PHP" \
+            --rawfile changelog "${RUNNER_TEMP}/changelog.txt" \
+            '{name: $name, slug: $slug, version: $version, download_url: $download_url, details_url: $details_url,
+              homepage: $homepage, released: $released, requires: $requires, tested: $tested,
+              requires_php: $requires_php, changelog: ($changelog | split("\n") | map(select(length > 0)))}' \
+            > "${RUNNER_TEMP}/info.json"
+          cat "${RUNNER_TEMP}/info.json"
+
       - name: Crear la release en GitHub
         if: steps.version.outputs.skip != 'true'
         env:
@@ -113,7 +159,8 @@ jobs:
             --notes-file "${RUNNER_TEMP}/notes.md" \
             --latest \
             "${RUNNER_TEMP}/${PLUGIN_SLUG}-${VERSION}.zip" \
-            "${RUNNER_TEMP}/${PLUGIN_SLUG}.zip"
+            "${RUNNER_TEMP}/${PLUGIN_SLUG}.zip" \
+            "${RUNNER_TEMP}/info.json"
 
           echo "Release v${VERSION} creada."
           echo "Enlace a la última versión: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/${PLUGIN_SLUG}.zip"

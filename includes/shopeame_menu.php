@@ -104,6 +104,8 @@ class shopeame_menu {
         // los avisos de otros plugins se colocan aquí; el nuestro lleva la clase "inline" para no moverse
         echo '<hr class="wp-header-end">';
 
+        $this->renderUpdateNotice();
+
         // preguntamos a shopea.me si la tienda sigue vinculada: si se desvincula desde allí, el
         // plugin no se entera y conserva las credenciales
         $state = shopeame_check_link_state();
@@ -113,7 +115,74 @@ class shopeame_menu {
             $this->renderNotLinkedView();
         }
 
+        $this->renderVersionFooter();
+
         echo '</div>';
+    }
+
+    /**
+     * Pinta el aviso de versión nueva, si WordPress ha encontrado una en la última comprobación.
+     *
+     * El botón «Actualizar ahora» usa la misma acción y el mismo nonce que el enlace de la pantalla de plugins, así que
+     * la actualización la hace WordPress con su actualizador, no el plugin. Solo lo ve quien puede actualizar plugins.
+     *
+     * @return void
+     */
+    private function renderUpdateNotice() {
+        $update = shopeame_pending_update();
+        if ( $update === null ) {
+            return;
+        }
+
+        $file = plugin_basename( SHOPEAME_PLUGIN_FILE );
+        echo '<div class="notice notice-warning inline shopeame-update-notice"><p>';
+        echo esc_html(
+            sprintf(
+                /* translators: 1: new version number, 2: installed version number */
+                __( 'A new version of Shopeame is available: %1$s. You have version %2$s.', 'shopeame' ),
+                $update->new_version,
+                SHOPEAME_VERSION
+            )
+        );
+        echo '</p><p>';
+        if ( current_user_can( 'update_plugins' ) ) {
+            printf(
+                '<a class="button button-primary" href="%s">%s</a> ',
+                esc_url( wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . rawurlencode( $file ) ), 'upgrade-plugin_' . $file ) ),
+                esc_html__( 'Update now', 'shopeame' )
+            );
+        }
+        if ( ! empty( $update->url ) ) {
+            echo wp_kses_post( $this->externalLink( $update->url, __( 'What’s new', 'shopeame' ) ) );
+        }
+        echo '</p></div>';
+    }
+
+    /**
+     * Pinta al pie de la pantalla la versión instalada y el enlace para buscar actualizaciones.
+     *
+     * El enlace abre **Escritorio → Actualizaciones** con `force-check`, que hace que WordPress vuelva a preguntar por
+     * las versiones nuevas en ese momento en lugar de esperar a su comprobación periódica.
+     *
+     * @return void
+     */
+    private function renderVersionFooter() {
+        echo '<p class="shopeame-version">';
+        echo esc_html(
+            sprintf(
+                /* translators: %s: installed version number */
+                __( 'Shopeame version %s', 'shopeame' ),
+                SHOPEAME_VERSION
+            )
+        );
+        if ( current_user_can( 'update_plugins' ) ) {
+            printf(
+                ' · <a href="%s">%s</a>',
+                esc_url( self_admin_url( 'update-core.php?force-check=1' ) ),
+                esc_html__( 'Check for updates', 'shopeame' )
+            );
+        }
+        echo '</p>';
     }
 
     /**
