@@ -13,6 +13,7 @@
  * License:              GPLv3 or later
  * License URI:          https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:          shopeame
+ * Domain Path:          /languages
  * WC requires at least: 8.0
  * WC tested up to:      11.2
  *
@@ -40,6 +41,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_modificar_pedido.p
 require_once plugin_dir_path( __FILE__ ) . 'includes/shopeame_updater.php';
 
 add_action( 'plugins_loaded', 'shopeame_maybe_upgrade' );
+add_action( 'init', 'shopeame_load_textdomain' );
 // actualizaciones desde las releases de GitHub: el filtro lleva el host de la cabecera «Update URI» (github.com)
 add_filter( 'update_plugins_' . wp_parse_url( SHOPEAME_UPDATE_URI, PHP_URL_HOST ), 'shopeame_filter_update_plugins', 10, 3 );
 add_filter( 'plugins_api', 'shopeame_filter_plugins_api', 10, 3 );
@@ -48,6 +50,19 @@ add_action( 'admin_menu', 'shopeame_add_menu' );
 add_action( 'admin_enqueue_scripts', 'shopeame_enqueue_admin_assets' );
 add_action( 'woocommerce_new_order', 'shopeame_crear_pedido', 10, 1 );
 add_action( 'woocommerce_update_order', 'shopeame_modificar_pedido', 10, 1 );
+
+/**
+ * Carga las traducciones incluidas en la carpeta languages/ del plugin.
+ *
+ * El plugin no está en WordPress.org, así que WordPress no le descarga paquetes de idioma desde
+ * translate.wordpress.org: la traducción al español viaja en el zip (ver la decisión 0004 de Doc/Context).
+ * Si existe un paquete en wp-content/languages/plugins/, WordPress lo prefiere a este.
+ *
+ * @return void
+ */
+function shopeame_load_textdomain() {
+    load_plugin_textdomain( 'shopeame', false, dirname( plugin_basename( SHOPEAME_PLUGIN_FILE ) ) . '/languages' );
+}
 
 /**
  * Declara la compatibilidad del plugin con las funcionalidades de WooCommerce.
