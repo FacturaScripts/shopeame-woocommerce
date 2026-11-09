@@ -2,7 +2,7 @@
 
 El plugin permite descargar las facturas que el ERP ha generado para cada pedido: al comercio, desde el listado y la
 ficha de los pedidos, y al cliente, desde Mi cuenta (si la opción `shopeame_customer_invoices` está activa). Por qué
-se hace así: [decisión 0003](Decisiones/0003-facturas-bajo-demanda-a-traves-de-shopeame.md).
+se hace así: [decisión 0005](Decisiones/0005-facturas-bajo-demanda-a-traves-de-shopeame.md).
 
 ## 5.1 Recorrido
 

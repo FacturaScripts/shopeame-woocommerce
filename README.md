@@ -4,8 +4,9 @@ Plugin que conecta una tienda **WooCommerce** (WordPress) con **[shopea.me](http
 (ShopeameServer), para que shopea.me sincronice el catálogo y los pedidos de la tienda con el ERP
 (FacturaScripts / factura.city).
 
-> Este archivo es la documentación de desarrollo del repositorio. La ficha pública del directorio de
-> WordPress.org está en `readme.txt` (en inglés, como exige el directorio).
+> Este archivo es la documentación de desarrollo del repositorio. El plugin no está en el directorio de
+> WordPress.org: se descarga de las [releases de GitHub](https://github.com/FacturaScripts/shopeame-woocommerce/releases).
+> `readme.txt` (en inglés) sigue el formato estándar de WordPress y de él salen las notas de cada release.
 
 ## Qué hace
 
@@ -28,6 +29,10 @@ Plugin que conecta una tienda **WooCommerce** (WordPress) con **[shopea.me](http
   Los fallos se guardan en el registro de WooCommerce (*WooCommerce > Estado > Registros*, fuente
   `shopeame`).
 - Al **eliminar** el plugin (`uninstall.php`) se borran sus opciones y las claves de la API que creó.
+- **Actualizaciones**: la cabecera `Update URI` y los filtros `update_plugins_github.com` y `plugins_api`
+  (`includes/shopeame_updater.php`) hacen que WordPress ofrezca las versiones nuevas de GitHub en **Plugins** y
+  **Escritorio > Actualizaciones**, con actualizaciones automáticas. La pantalla Shopeame muestra también el aviso con
+  el botón **Actualizar ahora**, la versión instalada y **Buscar actualizaciones**.
 
 La recepción automática requiere HTTPS y una firma HMAC-SHA256 vigente creada con la Consumer
 secret guardada por el plugin. Si el endpoint no está disponible, se mantiene el copiado manual.
@@ -54,25 +59,21 @@ Requiere **WooCommerce** activo (cabecera `Requires Plugins: woocommerce`).
 
 ## Traducciones
 
-Las cadenas del código están en inglés con el text domain `shopeame`. El plugin **no incluye
-traducciones**: WordPress.org las genera desde translate.wordpress.org y las instala solo (por eso no
-se usa `load_plugin_textdomain()`, que Plugin Check desaconseja). Hasta que exista el paquete de
-idioma español, la pantalla se verá en inglés.
-
-La carpeta `languages/` solo está en el repositorio (`.distignore` la deja fuera del zip). Contiene
-la plantilla `shopeame.pot` y la traducción completa `shopeame-es_ES.po`, que puedes importar en
-https://translate.wordpress.org/projects/wp-plugins/shopeame/ una vez aprobado el plugin (para
-aprobar tus propias traducciones necesitas el rol de PTE del proyecto). Para regenerarlas tras
-cambiar textos:
+Las cadenas del código están en inglés con el text domain `shopeame`. La traducción al español va
+**incluida** en `languages/` (plantilla `shopeame.pot`, `shopeame-es_ES.po` y su `shopeame-es_ES.mo`
+compilado) y se carga con `load_plugin_textdomain()`: fuera de WordPress.org no hay paquetes de idioma
+de translate.wordpress.org. Para regenerarlas tras cambiar textos:
 
 ```bash
 xgettext --language=PHP --from-code=UTF-8 --add-comments=translators: --keyword=__ --keyword=_e \
   --keyword=esc_html__ --keyword=esc_html_e --keyword=esc_attr__ --keyword=esc_attr_e \
   -o languages/shopeame.pot shopeame.php includes/*.php
-msgmerge --update languages/shopeame-es_ES.po languages/shopeame.pot
+msgmerge --update --backup=none languages/shopeame-es_ES.po languages/shopeame.pot
+# traduce en el .po las cadenas nuevas (msgstr vacío) y compila:
+msgfmt -o languages/shopeame-es_ES.mo languages/shopeame-es_ES.po
 ```
 
-## Publicar en WordPress.org
+## Publicar una versión
 
 1. Sube la versión en `shopeame.php` (cabecera `Version` y constante `SHOPEAME_VERSION`) y en el
    `Stable tag` de `readme.txt`, y añade la entrada al `Changelog`.
@@ -80,14 +81,18 @@ msgmerge --update languages/shopeame-es_ES.po languages/shopeame.pot
    `zip-plugins/shopeame-woocommerce.zip` con una única carpeta `shopeame` y sin los archivos de
    desarrollo listados en `.distignore` (se genera fuera del repositorio, porque Plugin Check rechaza
    zips y scripts `.sh` dentro del plugin).
-3. Pasa *Herramientas > Comprobar plugins* (Plugin Check) sobre el plugin instalado desde ese zip.
+3. Pasa *Herramientas > Comprobar plugins* (Plugin Check) sobre el plugin instalado desde ese zip: solo
+   deben salir el error `plugin_updater_detected` y la advertencia de `load_plugin_textdomain()`, que son
+   reglas del directorio de WordPress.org.
 
 ## Release en GitHub
 
 Con los cambios de versión ya en `master`, lanza la acción **Crear Release** desde la pestaña *Actions* del
 repositorio (o `gh workflow run release.yml`). Comprueba que la versión coincide en los tres sitios, crea la
-etiqueta `v<versión>` con las notas del `Changelog` de `readme.txt` y adjunta el zip dos veces:
-`shopeame-<versión>.zip` y `shopeame.zip`. Si esa versión ya tiene release, no hace nada.
+etiqueta `v<versión>` con las notas del `Changelog` de `readme.txt` y adjunta `shopeame-<versión>.zip`,
+`shopeame.zip` e `info.json`. Si esa versión ya tiene release, no hace nada. Las tiendas instaladas ven la
+versión nueva en su siguiente comprobación de actualizaciones, porque el plugin lee
+`releases/latest/download/info.json`.
 
 El enlace https://github.com/FacturaScripts/shopeame-woocommerce/releases/latest/download/shopeame.zip descarga
 siempre la última release (solo funciona sin iniciar sesión si el repositorio es público).
@@ -104,8 +109,11 @@ usa `https://shopea.me` (producción). Para apuntar a una instalación local, de
 define('SHOPEAME_SERVER_URL', 'https://shopea.localhost');
 ```
 
+Para probar las actualizaciones sin publicar una release, `SHOPEAME_UPDATE_INFO_URL` apunta a un
+`info.json` local (ver `Doc/Dev/como-desarrollar-y-publicar-shopeame-para-woocommerce.md`).
+
 Las peticiones usan la API HTTP de WordPress (`wp_remote_post`), que **siempre verifica el
-certificado TLS** (WordPress.org no admite plugins que desactiven esa verificación). Si el servidor
+certificado TLS** (es una de las directrices de WordPress.org que el plugin mantiene). Si el servidor
 local usa un certificado autofirmado, añade su CA (por ejemplo, la de ServBay) al almacén del sistema
 o, solo en tu instalación local, crea un mu-plugin con:
 

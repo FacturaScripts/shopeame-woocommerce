@@ -1,4 +1,4 @@
-# 0003. Facturas de los pedidos bajo demanda a través de shopea.me
+# 0005. Facturas de los pedidos bajo demanda a través de shopea.me
 
 - **Fecha**: 05/11/2026
 - **Aprobada por**: el usuario («Me gusta la opción A y me parece correcta», al elegir cómo llevar las facturas del ERP

@@ -156,3 +156,16 @@
 .wp-core-ui .button.shopeame-button-critical-secondary:focus {
     box-shadow: 0 0 0 1px #d63638;
 }
+
+/* Aviso de versión nueva: el botón «Actualizar ahora» y el enlace a las novedades en la misma línea */
+.shopeame-update-notice .button {
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+/* Pie con la versión instalada y el enlace para buscar actualizaciones */
+.shopeame-version {
+    color: #646970;
+    font-size: 12px;
+    margin: 0;
+}
