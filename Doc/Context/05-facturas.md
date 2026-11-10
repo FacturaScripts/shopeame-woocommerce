@@ -56,8 +56,8 @@ pulsar el botón de un pedido.
   pedido recibido).
 - La columna lleva la clase `no-link`: el listado de WooCommerce abre el pedido al pulsar en cualquier parte de la fila
   salvo en enlaces, botones y elementos `no-link`.
-- Los textos del script llegan traducidos desde PHP con `wp_localize_script()` (ver
-  [decisión 0002](Decisiones/0002-textos-en-ingles-sin-traducciones-incluidas.md)).
+- Los textos del script llegan traducidos desde PHP con `wp_localize_script()`, con la traducción incluida en
+  `languages/` (ver [decisión 0004](Decisiones/0004-traducciones-incluidas-en-el-plugin.md)).
 - `assets/shopeame-orders.js` y `assets/shopeame-orders.css` solo se encolan en las pantallas
   `woocommerce_page_wc-orders` (HPOS), `edit-shop_order` y `shop_order` (pedidos clásicos), con la tienda vinculada, y
   en Mi cuenta para clientes con sesión iniciada si la opción está activa.
